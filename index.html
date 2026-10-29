@@ -1,0 +1,3388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MeuCRM - Edição Completa Agência & Salesforce Enterprise</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            sf: {
+              blue: '#0176d3',
+              dark: '#0b192e',
+              sidebar: '#001639',
+              accent: '#1589ee',
+              light: '#f3f6fb'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Supabase JS Client v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js para Motion Graphics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    
+    * {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.25);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.45);
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.85; }
+    }
+    .pulse-urgent {
+      animation: pulseSoft 2s infinite ease-in-out;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+    }
+    .dark .glass-card {
+      background: rgba(15, 23, 42, 0.88);
+    }
+
+    /* Salesforce Path */
+    .sf-path {
+      display: flex;
+      overflow-x: auto;
+      border-radius: 12px;
+      background: #e2e8f0;
+      padding: 3px;
+      gap: 2px;
+    }
+    .dark .sf-path {
+      background: #1e293b;
+    }
+    .sf-path-step {
+      flex: 1;
+      min-width: 110px;
+      padding: 9px 12px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      background: #ffffff;
+      color: #64748b;
+      transition: all 0.2s;
+      border-radius: 8px;
+      user-select: none;
+    }
+    .dark .sf-path-step {
+      background: #0f172a;
+      color: #94a3b8;
+    }
+    .sf-path-step.active {
+      background: #0176d3;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(1, 118, 211, 0.35);
+    }
+    .sf-path-step.completed {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .dark .sf-path-step.completed {
+      background: #082f49;
+      color: #38bdf8;
+    }
+
+    .kanban-col {
+      min-width: 295px;
+      width: 295px;
+    }
+    @media (max-width: 768px) {
+      .kanban-col {
+        min-width: 86vw;
+        width: 86vw;
+      }
+    }
+
+    @media print {
+      aside, header, nav, #bulk-action-bar, .no-print, button {
+        display: none !important;
+      }
+      body, main {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .glass-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex antialiased transition-colors duration-200">
+  <!-- TELA DE LOGIN / BLOQUEIO SEGURO -->
+  <div id="login-overlay" class="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4 transition-opacity duration-300 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md shadow-2xl p-8 space-y-6 relative overflow-hidden">
+      <div class="absolute -top-12 -right-12 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="text-center space-y-2 relative">
+        <div class="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
+          <i data-lucide="lock" class="w-7 h-7"></i>
+        </div>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">MeuCRM Enterprise</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Acesso Restrito & Painel de Vendas da Agência</p>
+      </div>
+
+      <form onsubmit="handleLoginSubmit(event)" class="space-y-4 relative">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Senha Mestre de Acesso</label>
+          <div class="relative">
+            <input type="password" id="login-password-input" autofocus placeholder="Digite sua senha de acesso" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white transition pl-10">
+            <i data-lucide="key-round" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+          </div>
+          <div id="login-error-msg" class="text-xs text-rose-500 font-semibold mt-1.5 hidden flex items-center gap-1">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Senha incorreta. Tente novamente.
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs">
+          <label class="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400">
+            <input type="checkbox" id="login-remember" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+            Lembrar neste dispositivo
+          </label>
+          <span class="text-[11px] text-slate-400">Padrão: <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-bold text-blue-500">admin123</code></span>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 transition flex items-center justify-center gap-2">
+          <span>Desbloquear Painel</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+
+      <div class="pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
+        <p class="text-[11px] text-slate-400 flex items-center justify-center gap-1">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Seus dados protegidos localmente e na nuvem
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Sidebar Desktop -->
+  <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col border-r border-slate-800 z-20">
+    <div class="h-16 flex items-center justify-between px-4 border-b border-slate-800">
+      <div class="flex items-center gap-2.5">
+        <button onclick="openAppLauncher()" title="Iniciador de Áreas (App Launcher)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-white flex items-center justify-center transition shadow border border-slate-700/60">
+          <i data-lucide="grid" class="w-5 h-5"></i>
+        </button>
+        <div>
+          <span class="font-bold text-white tracking-tight text-base leading-none">MeuCRM</span>
+          <span class="block text-[10px] uppercase font-bold tracking-wider text-sky-400 mt-0.5">Salesforce Cloud</span>
+        </div>
+      </div>
+      <button onclick="toggleDarkMode()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+        <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+        <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+      </button>
+    </div>
+
+    <!-- Navegação Menu -->
+    <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+      <button onclick="setTab('painel')" id="nav-painel" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Painel & Forecast</span>
+        </div>
+      </button>
+
+      <button onclick="setTab('atendimento')" id="nav-atendimento" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="phone-call" class="w-4 h-4 text-emerald-400"></i>
+          <span>Fila de Atendimento</span>
+        </div>
+        <span id="badge-atender" class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white shadow-sm shadow-rose-500/40 hidden">0</span>
+      </button>
+
+      <button onclick="setTab('funil')" id="nav-funil" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="filter" class="w-4 h-4 text-amber-400"></i>
+          <span>Funil & Scoring</span>
+        </div>
+        <span id="badge-leads" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-semibold">0</span>
+      </button>
+
+      <button onclick="setTab('equipe')" id="nav-equipe" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="user-check" class="w-4 h-4 text-purple-400"></i>
+          <span>Área Colaboradores</span>
+        </div>
+        <span id="badge-colabs" class="text-xs px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800 font-semibold">3</span>
+      </button>
+
+      <button onclick="setTab('tarefas')" id="nav-tarefas" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="check-square" class="w-4 h-4 text-teal-400"></i>
+          <span>Tarefas & Follow-up</span>
+        </div>
+        <span id="badge-tarefas" class="text-xs px-2 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-800 font-semibold">0</span>
+      </button>
+
+      <button onclick="setTab('relatorios')" id="nav-relatorios" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
+          <span>Relatórios & Comissões</span>
+        </div>
+      </button>
+
+      <button onclick="setTab('jornada')" id="nav-jornada" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="rocket" class="w-4 h-4 text-indigo-400"></i>
+          <span>Jornada do Cliente</span>
+        </div>
+        <span id="badge-jornada" class="text-xs px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800 font-semibold">0</span>
+      </button>
+
+      <button onclick="setTab('propostas')" id="nav-propostas" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+          <span>Propostas & Simulador</span>
+        </div>
+      </button>
+
+      <button onclick="setTab('contatos')" id="nav-contatos" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="users" class="w-4 h-4 text-cyan-400"></i>
+          <span>Base de Contatos</span>
+        </div>
+      </button>
+
+      <div class="pt-4 mt-4 border-t border-slate-800">
+        <button onclick="setTab('config')" id="nav-config" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+          <div class="flex items-center gap-3">
+            <i data-lucide="database" class="w-4 h-4 text-slate-400"></i>
+            <span>Banco & Backup</span>
+          </div>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-400 bg-emerald-950/60 border border-emerald-800/80 px-2 py-0.5 rounded-full">Offline</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="p-3 border-t border-slate-800">
+      <div class="bg-slate-800/70 rounded-xl p-3 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs">SF</div>
+          <div class="truncate">
+            <div class="text-xs font-semibold text-white truncate">Agência Digital</div>
+            <div class="text-[11px] text-slate-400 truncate">Vendas & Scripts WA</div>
+          </div>
+        </div>
+        <button onclick="openNewLeadModal()" title="Novo Lead" class="w-7 h-7 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition shadow">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Conteúdo Principal -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+    
+    <header class="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:hidden sticky top-0 z-10 no-print">
+      <div class="flex items-center gap-2">
+        <button onclick="openAppLauncher()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-blue-600">
+          <i data-lucide="grid" class="w-5 h-5"></i>
+        </button>
+        <span class="font-bold text-slate-900 dark:text-white">MeuCRM</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openNewLeadModal()" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold flex items-center gap-1">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Lead
+        </button>
+        <button onclick="toggleDarkMode()" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+          <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+        </button>
+      </div>
+    </header>
+
+    
+    <!-- Header Desktop com Status Cloud & Ações -->
+    <header class="h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 hidden md:flex items-center justify-between px-8 sticky top-0 z-10 no-print">
+      <div class="flex items-center gap-3">
+        <h2 id="current-tab-title" class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Painel & Forecast</h2>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Cloud Status Pill -->
+        <button onclick="openSupabaseModal()" id="desktop-cloud-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 hover:brightness-105 transition shadow-sm" title="Clique para configurar o Supabase">
+          <span id="desktop-cloud-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <span id="desktop-cloud-text">Modo Offline (Local)</span>
+        </button>
+
+        <!-- Sincronizar Agora -->
+        <button onclick="manualSyncCloud(false)" id="btn-sync-cloud" title="Sincronizar com Nuvem Supabase" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition shadow-sm border border-slate-200 dark:border-slate-700">
+          <i data-lucide="refresh-cw" class="w-4 h-4" id="sync-icon"></i>
+        </button>
+
+        <!-- Novo Lead -->
+        <button onclick="openNewLeadModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow flex items-center gap-1.5">
+          <i data-lucide="plus" class="w-4 h-4"></i> Novo Lead
+        </button>
+
+        <div class="h-5 w-px bg-slate-200 dark:bg-slate-800"></div>
+
+        <!-- Bloquear Tela / Logout -->
+        <button onclick="lockApp()" title="Bloquear Tela (Acesso Seguro)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-rose-100 dark:bg-slate-800 dark:hover:bg-rose-950/50 text-slate-600 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400 flex items-center justify-center transition border border-slate-200 dark:border-slate-700">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Alternar Tema -->
+        <button onclick="toggleDarkMode()" title="Alternar Modo Escuro" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition border border-slate-200 dark:border-slate-700">
+          <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+          <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+        </button>
+      </div>
+    </header>
+
+    <main id="app-view" class="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto pb-28 md:pb-10"></main>
+
+    <!-- Barra Flutuante de Ação em Massa -->
+    <div id="bulk-action-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 hidden items-center gap-4 z-40 no-print">
+      <span class="text-xs font-bold text-sky-400" id="bulk-selected-count">0 leads selecionados</span>
+      <div class="h-4 w-px bg-slate-700"></div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-300">Atribuir a:</span>
+        <select id="bulk-assign-select" class="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white"></select>
+        <button onclick="applyBulkAssign()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition">
+          Transferir
+        </button>
+      </div>
+      <button onclick="clearBulkSelection()" class="text-xs text-slate-400 hover:text-white ml-2">Cancelar</button>
+    </div>
+
+    <!-- Bottom Navigation Mobile -->
+        <!-- Bottom Navigation Mobile com Destaque Ativo & Todas as Áreas -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 flex items-center justify-around px-1 py-1.5 z-40 no-print shadow-lg">
+      <button onclick="setTab('painel')" id="mobile-nav-painel" class="mobile-nav-btn flex flex-col items-center justify-center flex-1 py-1 rounded-xl text-[10px] text-slate-500 dark:text-slate-400 font-medium transition active:scale-95">
+        <div class="relative">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        </div>
+        <span class="mt-0.5 leading-none">Painel</span>
+        <span class="mobile-active-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 hidden"></span>
+      </button>
+
+      <button onclick="setTab('atendimento')" id="mobile-nav-atendimento" class="mobile-nav-btn flex flex-col items-center justify-center flex-1 py-1 rounded-xl text-[10px] text-slate-500 dark:text-slate-400 font-medium transition active:scale-95 relative">
+        <div class="relative">
+          <i data-lucide="phone-call" class="w-5 h-5"></i>
+          <span id="badge-atender-mobile" class="absolute -top-1 -right-2 text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500 text-white shadow-sm hidden">0</span>
+        </div>
+        <span class="mt-0.5 leading-none">Atender</span>
+        <span class="mobile-active-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 hidden"></span>
+      </button>
+
+      <button onclick="setTab('funil')" id="mobile-nav-funil" class="mobile-nav-btn flex flex-col items-center justify-center flex-1 py-1 rounded-xl text-[10px] text-slate-500 dark:text-slate-400 font-medium transition active:scale-95">
+        <div class="relative">
+          <i data-lucide="filter" class="w-5 h-5"></i>
+        </div>
+        <span class="mt-0.5 leading-none">Funil</span>
+        <span class="mobile-active-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 hidden"></span>
+      </button>
+
+      <button onclick="setTab('equipe')" id="mobile-nav-equipe" class="mobile-nav-btn flex flex-col items-center justify-center flex-1 py-1 rounded-xl text-[10px] text-slate-500 dark:text-slate-400 font-medium transition active:scale-95">
+        <div class="relative">
+          <i data-lucide="user-check" class="w-5 h-5"></i>
+        </div>
+        <span class="mt-0.5 leading-none">Equipe</span>
+        <span class="mobile-active-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 hidden"></span>
+      </button>
+
+      <button onclick="openAppLauncher()" id="mobile-nav-mais" class="mobile-nav-btn flex flex-col items-center justify-center flex-1 py-1 rounded-xl text-[10px] text-slate-500 dark:text-slate-400 font-medium transition active:scale-95">
+        <div class="relative">
+          <i data-lucide="grid" class="w-5 h-5"></i>
+        </div>
+        <span class="mt-0.5 leading-none">Mais Áreas</span>
+        <span class="mobile-active-dot w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 hidden"></span>
+      </button>
+    </nav>
+  </div>
+
+  
+  <!-- MODAL: CONEXÃO NUVEM & SUPABASE -->
+  <div id="modal-supabase-config" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-xl shadow-2xl p-6 md:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+            <i data-lucide="cloud" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Conexão Nuvem & Supabase</h3>
+            <p class="text-xs text-slate-500">Sincronize seus dados em tempo real entre computadores</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-supabase-config')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Status Atual da Conexão -->
+      <div id="supabase-status-banner" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span id="supabase-status-dot" class="w-3 h-3 rounded-full bg-amber-500"></span>
+          <div>
+            <div id="supabase-status-title" class="text-xs font-bold text-slate-800 dark:text-slate-200">Modo Local Offline</div>
+            <div id="supabase-status-desc" class="text-[11px] text-slate-500">Dados salvos apenas no navegador atual.</div>
+          </div>
+        </div>
+        <button onclick="testSupabaseConnectionFromModal()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition">
+          Testar Conexão
+        </button>
+      </div>
+
+      <!-- Formulário de Credenciais -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            URL do Projeto Supabase
+          </label>
+          <input type="text" id="supabase-url-input" placeholder="https://xyzcompany.supabase.co" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white">
+          <p class="text-[11px] text-slate-400 mt-1">Encontrado em: Supabase Dashboard > Project Settings > API > Project URL</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            Chave Anon Pública (anon / public key)
+          </label>
+          <input type="password" id="supabase-key-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white">
+          <p class="text-[11px] text-slate-400 mt-1">Encontrado em: Supabase Dashboard > Project Settings > API > Project API keys (anon / public)</p>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <button onclick="saveSupabaseCredentialsFromModal()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-2">
+            <i data-lucide="check" class="w-4 h-4"></i> Salvar Credenciais & Conectar
+          </button>
+          <button onclick="disconnectSupabaseFromModal()" class="px-4 py-2.5 border border-rose-300 dark:border-rose-900/60 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl text-xs font-bold transition">
+            Desconectar
+          </button>
+        </div>
+      </div>
+
+      <!-- Sincronização Manual -->
+      <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Ações de Sincronização
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button onclick="manualSyncCloud(true)" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 transition text-left group">
+            <div class="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">
+              <i data-lucide="upload-cloud" class="w-4 h-4 group-hover:-translate-y-0.5 transition"></i> Enviar para Nuvem (Push)
+            </div>
+            <p class="text-[11px] text-slate-500">Envia todos os dados deste navegador para o Supabase.</p>
+          </button>
+
+          <button onclick="syncPullFromSupabase()" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition text-left group">
+            <div class="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 mb-1">
+              <i data-lucide="download-cloud" class="w-4 h-4 group-hover:translate-y-0.5 transition"></i> Baixar da Nuvem (Pull)
+            </div>
+            <p class="text-[11px] text-slate-500">Atualiza este computador com os dados mais recentes da nuvem.</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- Gerador de Script SQL (1 Clique) -->
+      <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="terminal" class="w-4 h-4 text-purple-500"></i>
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              Script SQL de Criação no Supabase
+            </h4>
+          </div>
+          <button onclick="copySupabaseSQLScript()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Código SQL
+          </button>
+        </div>
+        <p class="text-xs text-slate-500">
+          Copie e cole este código no menu <strong>SQL Editor</strong> do seu painel Supabase para criar as tabelas e permissões automaticamente com 1 clique.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: SCRIPTS DE WHATSAPP COM 1 CLIQUE (PLAYBOOK DE VENDAS) -->
+  <div id="modal-scripts" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-slate-900 dark:text-white">Scripts de Vendas no WhatsApp</h3>
+            <p class="text-xs text-slate-500" id="script-target-lead-name">Disparo rápido personalizado</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-scripts')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3" id="scripts-list-container">
+        <!-- Injetado dinamicamente via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: APP LAUNCHER (9 PONTOS) -->
+  <div id="modal-app-launcher" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <i data-lucide="grid" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Iniciador de Aplicativos (App Launcher)</h3>
+            <p class="text-xs text-slate-500">Acesse qualquer área do CRM instantaneamente</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-app-launcher')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+        <input type="text" id="launcher-search" oninput="filterLauncher(this.value)" placeholder="Pesquisar áreas, relatórios e comissões..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <div id="launcher-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 max-h-[60vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Novo Lead / Editar Lead -->
+  <div id="modal-lead" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <h3 id="modal-lead-title" class="font-bold text-base text-slate-900 dark:text-white">Nova Oportunidade</h3>
+        <button onclick="closeModal('modal-lead')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4">
+        <input type="hidden" id="lead-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Nome do Contato *</label>
+          <input type="text" id="lead-name" placeholder="Ex: Carlos Mendes" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white">
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Empresa / Instagram</label>
+            <input type="text" id="lead-company" placeholder="Ex: @clinica.mendes" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">WhatsApp *</label>
+            <input type="text" id="lead-phone" placeholder="Ex: (11) 98765-4321" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Serviço</label>
+            <select id="lead-service" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+              <option value="redes_sociais">📱 Redes Sociais</option>
+              <option value="trafego_pago">🎯 Tráfego Pago & Ads</option>
+              <option value="webproduto">💻 Webproduto / Site</option>
+              <option value="combo_completo">🚀 Combo Full</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Canal de Origem</label>
+            <select id="lead-source" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+              <option value="instagram">📸 Instagram Orgânico</option>
+              <option value="meta_ads">🎯 Meta Ads (Tráfego Pago)</option>
+              <option value="indicacao">🤝 Indicação</option>
+              <option value="google">🔍 Google / Site</option>
+              <option value="prospeccao">📞 Prospecção Ativa</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Mensalidade (R$/mês)</label>
+            <input type="number" id="lead-value" placeholder="2000" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Colaborador Dono</label>
+          <select id="lead-assigned" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white"></select>
+        </div>
+
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">🎯 Próxima Ação Agendada (Follow-up)</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input type="text" id="lead-nextstep" placeholder="Ex: Ligar para alinhar proposta..." class="sm:col-span-2 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+            <input type="date" id="lead-nextstep-date" class="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Observações</label>
+          <textarea id="lead-notes" rows="2" placeholder="Diagnóstico inicial..." class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white"></textarea>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-between">
+        <button type="button" id="btn-delete-lead" onclick="deleteCurrentLead()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold hidden">Excluir</button>
+        <div class="flex items-center gap-2 ml-auto">
+          <button type="button" onclick="closeModal('modal-lead')" class="px-4 py-2 text-sm text-slate-600 rounded-xl font-medium">Cancelar</button>
+          <button type="button" onclick="saveLead()" class="px-5 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Ficha Detalhada (Salesforce Path, Colaborador & Scripts WA) -->
+  <div id="modal-details" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-500 flex items-center justify-center text-white font-bold shadow">
+            <i data-lucide="building" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="details-name" class="font-extrabold text-lg text-slate-900 dark:text-white">Nome do Cliente</h3>
+              <span id="details-scoring-badge" class="px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">Score 85</span>
+              <span id="details-source-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 border border-slate-200">Instagram</span>
+            </div>
+            <span id="details-subtitle" class="text-xs text-slate-500 dark:text-slate-400">Empresa · Telefone</span>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-details')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-5">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Salesforce Path</span>
+            <span id="details-probability-text" class="text-xs font-extrabold text-blue-600">Probabilidade: 60%</span>
+          </div>
+          <div class="sf-path" id="salesforce-path-container"></div>
+        </div>
+
+        <div class="p-3.5 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900/60 rounded-xl text-xs text-sky-900 dark:text-sky-200 flex items-start gap-2.5">
+          <i data-lucide="compass" class="w-4 h-4 text-sky-600 flex-shrink-0 mt-0.5"></i>
+          <div id="details-guidance-text">Orientação estratégica da etapa...</div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Mensalidade (MRR)</span>
+            <div id="details-mrr" class="text-base font-extrabold text-emerald-600 mt-0.5">R$ 0</div>
+          </div>
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Forecast Ponderado</span>
+            <div id="details-weighted" class="text-base font-extrabold text-blue-600 mt-0.5">R$ 0</div>
+          </div>
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Colaborador</span>
+            <div id="details-colab-name" class="text-xs font-bold text-purple-600 mt-1 truncate">Lucas Silva</div>
+          </div>
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Temperatura</span>
+            <div id="details-temp" class="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1">🔥 Quente</div>
+          </div>
+        </div>
+
+        <!-- Botões de Disparo WhatsApp & Ações -->
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button onclick="openWhatsAppScriptsModal(currentDetailsLeadId)" class="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition">
+            <i data-lucide="message-square" class="w-4 h-4"></i> Disparar Script no WhatsApp
+          </button>
+          <button onclick="convertLeadToJourney()" class="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow transition">
+            <i data-lucide="rocket" class="w-4 h-4"></i> Mover para Jornada (Ganho)
+          </button>
+          <button onclick="openMarkLostModal()" class="flex items-center gap-1.5 px-3 py-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 hover:bg-rose-100 rounded-xl text-xs font-semibold transition">
+            <i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Marcar Perdido
+          </button>
+          <button onclick="openEditLeadFromDetails()" class="flex items-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition ml-auto">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Editar
+          </button>
+        </div>
+
+        <div class="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-3">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Histórico de Atividades</label>
+          <div class="flex gap-2">
+            <select id="interaction-type" class="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+              <option value="whatsapp">💬 WhatsApp</option>
+              <option value="ligacao">📞 Ligação</option>
+              <option value="reuniao">🤝 Reunião</option>
+              <option value="nota">📝 Nota / Ata</option>
+            </select>
+            <input type="text" id="interaction-text" placeholder="Registrar resumo da conversa..." class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+            <button onclick="addInteraction()" class="px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-xl text-xs font-bold transition">
+              Registrar
+            </button>
+          </div>
+          <div id="details-timeline" class="space-y-2.5 max-h-44 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT ENGINE & LOGIC COMPLETO -->
+  <script>
+    const STORAGE_KEY = 'MEUCRM_SALESFORCE_TEAM_V6';
+
+    const STAGES = [
+      { id: 0, name: 'Novo Lead', prob: 0.10, color: 'border-blue-500', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300', guidance: '🎯 Objetivo: Primeiro contato em menos de 15 minutos via WhatsApp.' },
+      { id: 1, name: 'Diagnóstico', prob: 0.30, color: 'border-amber-500', badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', guidance: '🎯 Objetivo: Entender orçamento, canais de interesse e meta de faturamento.' },
+      { id: 2, name: 'Proposta Enviada', prob: 0.60, color: 'border-indigo-500', badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300', guidance: '🎯 Objetivo: Enviar proposta de recorrência semestral ou anual e agendar apresentação.' },
+      { id: 3, name: 'Negociação', prob: 0.80, color: 'border-purple-500', badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300', guidance: '🎯 Objetivo: Tratar objeções, negociar condições e colher assinatura.' },
+      { id: 4, name: 'Ganho (Cliente)', prob: 1.00, color: 'border-emerald-500', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300', guidance: '🚀 Contrato Ganho! Disparar Onboarding, formulário de briefing e logins.' },
+      { id: 5, name: 'Perdido', prob: 0.00, color: 'border-rose-500', badge: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300', guidance: 'Oportunidade perdida documentada para análise comercial.' }
+    ];
+
+    const JOURNEY_STAGES = [
+      { id: 0, name: '1. Onboarding & Briefing', desc: 'Acessos, questionário e alinhamento', color: 'border-cyan-500' },
+      { id: 1, name: '2. Produção / Planejamento', desc: 'Criação de cronograma, pautas e criativos', color: 'border-amber-500' },
+      { id: 2, name: '3. Em Execução / No Ar', desc: 'Campanhas ativas, postagens diárias e suporte', color: 'border-emerald-500' },
+      { id: 3, name: '4. Retenção & Renovação', desc: 'Relatório de métricas e expansão de contrato', color: 'border-purple-500' }
+    ];
+
+    const SOURCES = {
+      'instagram': { label: '📸 Instagram', color: 'bg-pink-100 text-pink-700 border-pink-200' },
+      'meta_ads': { label: '🎯 Meta Ads', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+      'indicacao': { label: '🤝 Indicação', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+      'google': { label: '🔍 Google / Site', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+      'prospeccao': { label: '📞 Prospecção', color: 'bg-purple-100 text-purple-700 border-purple-200' }
+    };
+
+    const PROP_STATUS = ['Rascunho', 'Enviada', 'Aprovada', 'Recusada'];
+
+    let currentTab = 'painel';
+    let currentDetailsLeadId = null;
+    let selectedColabView = 'all';
+    let bulkSelectedLeadIds = new Set();
+
+    let activeFilters = { colab: 'all', service: 'all', temp: 'all', stalled: 'all' };
+    let dynamicCharts = {};
+
+    const DEFAULT_DATA = {
+      colaboradores: [
+        { id: 'colab-1', name: 'Lucas Silva', role: 'Closer / Vendedor', avatar: 'LS', metaMRR: 15000, comissaoPct: 10, color: 'bg-blue-600' },
+        { id: 'colab-2', name: 'Mariana Costa', role: 'Social Media & Criativos', avatar: 'MC', metaMRR: 10000, comissaoPct: 10, color: 'bg-purple-600' },
+        { id: 'colab-3', name: 'Rafael Santos', role: 'Gestor de Tráfego Ads', avatar: 'RS', metaMRR: 12000, comissaoPct: 10, color: 'bg-emerald-600' }
+      ],
+      leads: [
+        {
+          id: 'lead-1',
+          name: 'Dra. Camila Toledo',
+          company: '@clinica.toledo',
+          phone: '11988887777',
+          service: 'redes_sociais',
+          source: 'instagram',
+          value: 2500,
+          stage: 1,
+          assignedTo: 'colab-1',
+          attended: false,
+          createdAt: Date.now() - (1000 * 60 * 20),
+          lastContactAt: Date.now() - (1000 * 60 * 20),
+          nextStep: 'Ligar para entender foco dos procedimentos',
+          nextStepDate: new Date().toISOString().split('T')[0],
+          nextStepDone: false,
+          notes: 'Quer atrair pacientes para facetas e clareamento.'
+        },
+        {
+          id: 'lead-2',
+          name: 'Marcos Vinicius',
+          company: 'MV Hamburgueria Gourmet',
+          phone: '21977776666',
+          service: 'combo_completo',
+          source: 'meta_ads',
+          value: 3800,
+          stage: 3,
+          assignedTo: 'colab-1',
+          attended: true,
+          createdAt: Date.now() - (1000 * 60 * 60 * 48),
+          lastContactAt: Date.now() - (1000 * 60 * 60 * 2),
+          nextStep: 'Enviar contrato com vigência de 12 meses',
+          nextStepDate: new Date().toISOString().split('T')[0],
+          nextStepDone: false,
+          notes: 'Interesse no plano anual Meta Ads + Reels.'
+        },
+        {
+          id: 'lead-3',
+          name: 'Renata Albuquerque',
+          company: 'Boutique Flor de Lis',
+          phone: '31966665555',
+          service: 'webproduto',
+          source: 'google',
+          value: 1800,
+          stage: 0,
+          assignedTo: 'colab-2',
+          attended: false,
+          createdAt: Date.now() - (1000 * 60 * 60 * 96),
+          lastContactAt: Date.now() - (1000 * 60 * 60 * 96),
+          nextStep: 'Fazer primeiro contato via WhatsApp',
+          nextStepDate: new Date(Date.now() - (1000 * 60 * 60 * 24)).toISOString().split('T')[0],
+          nextStepDone: false,
+          notes: 'Cadastrou pelo formulário do site.'
+        },
+        {
+          id: 'lead-4',
+          name: 'Rodrigo Antunes',
+          company: 'Academia IronFit',
+          phone: '41955554444',
+          service: 'trafego_pago',
+          source: 'indicacao',
+          value: 3000,
+          stage: 4,
+          assignedTo: 'colab-3',
+          attended: true,
+          createdAt: Date.now() - (1000 * 60 * 60 * 24 * 7),
+          lastContactAt: Date.now() - (1000 * 60 * 60 * 24),
+          nextStep: 'Reunião de alinhamento de campanhas',
+          nextStepDate: new Date().toISOString().split('T')[0],
+          nextStepDone: true,
+          notes: 'Contrato semestral assinado.'
+        }
+      ],
+      jornada: [
+        {
+          id: 'jrn-1',
+          leadId: 'lead-4',
+          clientName: 'Rodrigo Antunes',
+          company: 'Academia IronFit',
+          mrr: 3000,
+          service: 'trafego_pago',
+          assignedTo: 'colab-3',
+          stage: 1,
+          startDate: new Date(Date.now() - (1000 * 60 * 60 * 24 * 5)).toISOString().split('T')[0],
+          renewalDate: new Date(Date.now() + (1000 * 60 * 60 * 24 * 175)).toISOString().split('T')[0],
+          health: 'excelente'
+        },
+        {
+          id: 'jrn-2',
+          leadId: null,
+          clientName: 'Dra. Patrícia Lima',
+          company: 'Instituto Pele Viva',
+          mrr: 3200,
+          service: 'redes_sociais',
+          assignedTo: 'colab-2',
+          stage: 2,
+          startDate: new Date(Date.now() - (1000 * 60 * 60 * 24 * 60)).toISOString().split('T')[0],
+          renewalDate: new Date(Date.now() + (1000 * 60 * 60 * 24 * 120)).toISOString().split('T')[0],
+          health: 'excelente'
+        }
+      ],
+      propostas: [
+        {
+          id: 'prop-1',
+          leadId: 'lead-2',
+          clientName: 'Marcos Vinicius – MV Hamburgueria',
+          items: [
+            { desc: 'Gestão de Tráfego Pago (Meta Ads)', qty: 1, unitPrice: 2000 },
+            { desc: 'Produção de 8 Reels/mês + Stories', qty: 1, unitPrice: 1800 }
+          ],
+          discount: 0,
+          totalMRR: 3800,
+          status: 1,
+          createdAt: Date.now() - (1000 * 60 * 60 * 20)
+        }
+      ],
+      historico: [
+        {
+          id: 'hist-1',
+          leadId: 'lead-1',
+          type: 'whatsapp',
+          text: 'Apresentação de casos médicos enviada via WhatsApp.',
+          date: Date.now() - (1000 * 60 * 15)
+        }
+      ]
+    };
+
+    function loadDB() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          saveDB(DEFAULT_DATA);
+          return DEFAULT_DATA;
+        }
+        return JSON.parse(raw);
+      } catch (e) {
+        return DEFAULT_DATA;
+      }
+    }
+
+    function saveDB(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.error(e);
+      }
+      updateBadges();
+      populateColabSelects();
+      if (supabaseClient && !supabaseSyncing) {
+        syncPushToSupabase(data);
+      }
+    }
+
+    function getColabName(id, db = null) {
+      const database = db || loadDB();
+      const colab = (database.colaboradores || []).find(c => c.id === id);
+      return colab ? colab.name : 'Não atribuído';
+    }
+
+    function calcLeadScore(lead, db) {
+      if (lead.stage === 4) return { score: 100, temp: 'won', label: 'Fechado', class: 'bg-emerald-100 text-emerald-800 border-emerald-300' };
+      if (lead.stage === 5) return { score: 0, temp: 'lost', label: 'Perdido', class: 'bg-rose-100 text-rose-800 border-rose-300' };
+
+      let points = 0;
+      const val = +lead.value || 0;
+      if (val >= 3500) points += 35;
+      else if (val >= 2500) points += 25;
+      else if (val >= 1500) points += 18;
+      else points += 10;
+
+      if (lead.stage === 3) points += 35;
+      else if (lead.stage === 2) points += 25;
+      else if (lead.stage === 1) points += 15;
+      else points += 5;
+
+      const hoursAgo = (Date.now() - (lead.lastContactAt || lead.createdAt)) / (1000 * 60 * 60);
+      if (hoursAgo < 12) points += 20;
+      else if (hoursAgo < 48) points += 12;
+      else if (hoursAgo < 96) points += 5;
+
+      const interCount = (db.historico || []).filter(h => h.leadId === lead.id).length;
+      points += Math.min(10, interCount * 4);
+
+      const finalScore = Math.min(100, Math.max(10, points));
+
+      if (finalScore >= 70) return { score: finalScore, temp: 'hot', label: '🔥 Quente', class: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-300' };
+      if (finalScore >= 40) return { score: finalScore, temp: 'warm', label: '🌤️ Morno', class: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border-sky-300' };
+      return { score: finalScore, temp: 'cold', label: '❄️ Frio', class: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300' };
+    }
+
+    function isStalled(lead) {
+      if (lead.stage >= 4) return false;
+      const days = (Date.now() - (lead.lastContactAt || lead.createdAt)) / (1000 * 60 * 60 * 24);
+      return days >= 3;
+    }
+    function getStalledDays(lead) {
+      return Math.floor((Date.now() - (lead.lastContactAt || lead.createdAt)) / (1000 * 60 * 60 * 24));
+    }
+    function formatBRL(v) {
+      return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function formatBRLShort(v) {
+      return 'R$ ' + Number(v || 0).toLocaleString('pt-BR');
+    }
+    function sanitize(s) {
+      return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]);
+    }
+    function serviceName(val) {
+      const map = {
+        'redes_sociais': '📱 Redes Sociais',
+        'trafego_pago': '🎯 Tráfego Pago',
+        'webproduto': '💻 Webproduto',
+        'combo_completo': '🚀 Combo Full'
+      };
+      return map[val] || '📱 Serviços';
+    }
+    function timeAgo(ts) {
+      const diffMin = Math.round((Date.now() - ts) / (1000 * 60));
+      if (diffMin < 1) return 'Agora mesmo';
+      if (diffMin < 60) return `${diffMin} min atrás`;
+      const diffHours = Math.round(diffMin / 60);
+      if (diffHours < 24) return `${diffHours}h atrás`;
+      return `${Math.round(diffHours / 24)} dias atrás`;
+    }
+
+    /* ==========================================================================
+       SCRIPTS DE WHATSAPP COM 1 CLIQUE (PLAYBOOK DE VENDAS)
+       ========================================================================== */
+    function openWhatsAppScriptsModal(leadId) {
+      const db = loadDB();
+      const lead = db.leads.find(l => l.id === leadId);
+      if (!lead) return;
+
+      document.getElementById('script-target-lead-name').textContent = `Para: ${lead.name} (${lead.company || 'Empresa'})`;
+
+      const cleanPhone = (lead.phone || '').replace(/\D/g, '');
+      const firstName = lead.name.split(' ')[0];
+      const serv = serviceName(lead.service);
+
+      const scripts = [
+        {
+          title: '⚡ 1. Primeiro Contato Imediato',
+          desc: 'Para novos leads que acabaram de chegar',
+          text: `Olá ${firstName}, tudo bem? Sou da equipe da Agência. Vi seu interesse em nossos serviços de ${serv} para a ${lead.company || 'sua empresa'}. Gostaria de entender o seu objetivo atual para prepararmos uma proposta personalizada. Podemos conversar 5 minutinhos?`
+        },
+        {
+          title: '📄 2. Follow-up de Proposta Enviada',
+          desc: 'Cobrança elegante de retorno comercial',
+          text: `Olá ${firstName}! Tudo bem? Conseguiu dar uma olhada na proposta de ${serv} que conversamos? Caso tenha alguma dúvida ou queira ajustar o escopo ou parcelamento, estou totalmente à disposição!`
+        },
+        {
+          title: '🤝 3. Negociação & Fechamento',
+          desc: 'Para incentivar a assinatura de contrato imediata',
+          text: `Oi ${firstName}! Conseguimos aprovar uma condição exclusiva de início para a ${lead.company || 'sua empresa'} fechando esta semana. Podemos gerar o contrato para darmos início ao cronograma?`
+        },
+        {
+          title: '🚀 4. Boas-vindas & Onboarding (Cliente Ganho)',
+          desc: 'Envio de questionário de briefing e coleta de acessos',
+          text: `Parabéns ${firstName}! Seja muito bem-vindo à nossa agência! Para iniciarmos o planejamento de ${serv}, por favor preencha nosso formulário inicial de briefing e envie os acessos do Instagram/Meta. Qualquer dúvida conte conosco!`
+        }
+      ];
+
+      const container = document.getElementById('scripts-list-container');
+      container.innerHTML = scripts.map(s => {
+        const encoded = encodeURIComponent(s.text);
+        const link = `https://wa.me/55${cleanPhone}?text=${encoded}`;
+
+        return `
+          <div class="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-xs text-slate-900 dark:text-white">${s.title}</span>
+              <a href="${link}" target="_blank" onclick="recordScriptSent('${lead.id}', '${s.title}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow transition">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i> Enviar no WhatsApp
+              </a>
+            </div>
+            <p class="text-[11px] text-slate-500">${s.desc}</p>
+            <div class="p-2.5 bg-white dark:bg-slate-900 rounded-lg text-xs text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-800 italic">
+              "${s.text}"
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+      openModal('modal-scripts');
+    }
+
+    function recordScriptSent(leadId, scriptTitle) {
+      const db = loadDB();
+      db.historico.push({
+        id: 'hist-' + Date.now(),
+        leadId: leadId,
+        type: 'whatsapp',
+        text: `Script disparado via WhatsApp: ${scriptTitle}`,
+        date: Date.now()
+      });
+      const lead = db.leads.find(l => l.id === leadId);
+      if (lead) {
+        lead.lastContactAt = Date.now();
+        lead.attended = true;
+      }
+      saveDB(db);
+    }
+
+    /* ==========================================================================
+       SIMULADOR DE PACOTES & CALCULADORA DE PREÇO (ABA PROPOSTAS)
+       ========================================================================== */
+    function calcSimulador() {
+      const posts = +document.getElementById('sim-posts').value || 3;
+      const reels = +document.getElementById('sim-reels').value || 4;
+      const trafego = document.getElementById('sim-trafego').checked;
+      const site = document.getElementById('sim-site').checked;
+
+      let total = (posts * 150) + (reels * 200);
+      if (trafego) total += 1200;
+      if (site) total += 500; // Manutenção do site
+
+      const display = document.getElementById('sim-resultado-display');
+      if (display) display.textContent = formatBRL(total) + '/mês';
+      return total;
+    }
+
+    function aplicarSimuladorNaProposta() {
+      const total = calcSimulador();
+      openNewProposalModal();
+      setTimeout(() => {
+        const valInput = document.querySelector('.prop-item-val');
+        if (valInput) {
+          valInput.value = total;
+          calcProposalTotal();
+        }
+      }, 100);
+    }
+
+    /* ==========================================================================
+       FILTROS CRUZADOS & NAVEGAÇÃO
+       ========================================================================== */
+    function applyCrossFilter(leadsList, db) {
+      return leadsList.filter(l => {
+        if (activeFilters.colab !== 'all' && l.assignedTo !== activeFilters.colab) return false;
+        if (activeFilters.service !== 'all' && l.service !== activeFilters.service) return false;
+        if (activeFilters.temp !== 'all') {
+          const scoreInfo = calcLeadScore(l, db);
+          if (scoreInfo.temp !== activeFilters.temp) return false;
+        }
+        if (activeFilters.stalled === 'stalled' && !isStalled(l)) return false;
+        return true;
+      });
+    }
+
+    function renderCrossFilterBar() {
+      const db = loadDB();
+      const colabs = db.colaboradores || [];
+
+      return `
+        <div class="glass-card p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs mb-5 no-print">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-600"></i>
+            <span class="font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Cruzar Dados:</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 flex-1">
+            <select onchange="activeFilters.colab=this.value; refreshCurrentView()" class="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white">
+              <option value="all" ${activeFilters.colab==='all'?'selected':''}>🧑‍💼 Todos Colaboradores</option>
+              ${colabs.map(c => `<option value="${c.id}" ${activeFilters.colab===c.id?'selected':''}>${sanitize(c.name)}</option>`).join('')}
+            </select>
+
+            <select onchange="activeFilters.service=this.value; refreshCurrentView()" class="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white">
+              <option value="all" ${activeFilters.service==='all'?'selected':''}>📱 Todos Serviços</option>
+              <option value="redes_sociais" ${activeFilters.service==='redes_sociais'?'selected':''}>Redes Sociais</option>
+              <option value="trafego_pago" ${activeFilters.service==='trafego_pago'?'selected':''}>Tráfego Pago</option>
+              <option value="webproduto" ${activeFilters.service==='webproduto'?'selected':''}>Webproduto</option>
+              <option value="combo_completo" ${activeFilters.service==='combo_completo'?'selected':''}>Combo Full</option>
+            </select>
+
+            <select onchange="activeFilters.temp=this.value; refreshCurrentView()" class="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white">
+              <option value="all" ${activeFilters.temp==='all'?'selected':''}>🌡️ Todas Temperaturas</option>
+              <option value="hot" ${activeFilters.temp==='hot'?'selected':''}>🔥 Quentes (Score 70+)</option>
+              <option value="warm" ${activeFilters.temp==='warm'?'selected':''}>🌤️ Mornos (40-69)</option>
+              <option value="cold" ${activeFilters.temp==='cold'?'selected':''}>❄️ Frios (<40)</option>
+            </select>
+
+            <select onchange="activeFilters.stalled=this.value; refreshCurrentView()" class="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white">
+              <option value="all" ${activeFilters.stalled==='all'?'selected':''}>⏰ Fluxo Normal e Travados</option>
+              <option value="stalled" ${activeFilters.stalled==='stalled'?'selected':''}>⚠️ Apenas Estagnados (+3 dias)</option>
+            </select>
+
+            ${(activeFilters.colab!=='all'||activeFilters.service!=='all'||activeFilters.temp!=='all'||activeFilters.stalled!=='all') ? `
+              <button onclick="resetFilters()" class="text-xs text-rose-500 font-bold hover:underline px-2 py-1">
+                Limpar Filtros ✕
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function resetFilters() {
+      activeFilters = { colab: 'all', service: 'all', temp: 'all', stalled: 'all' };
+      refreshCurrentView();
+    }
+
+    function refreshCurrentView() {
+      setTab(currentTab);
+    }
+
+    /* ==========================================================================
+       PAINEL & FORECAST COM GRÁFICO DE CANAIS DE ORIGEM
+       ========================================================================== */
+    function renderDashboard(container) {
+      const db = loadDB();
+      const leadsEmAberto = applyCrossFilter(db.leads.filter(l => l.stage < 4), db);
+      const mrrPipelineBruto = leadsEmAberto.reduce((acc, l) => acc + (+l.value || 0), 0);
+      const mrrForecastPonderado = Math.round(leadsEmAberto.reduce((acc, l) => acc + ((+l.value || 0) * (STAGES[l.stage]?.prob || 0)), 0));
+      const mrrAtivoJornada = db.jornada.reduce((acc, c) => acc + (+c.mrr || 0), 0);
+      const leadsPorAtender = leadsEmAberto.filter(l => !l.attended).length;
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Painel & Forecast Executivo</h1>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-300">Salesforce Intelligence</span>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Previsão matemática de fechamento e canais de maior conversão.</p>
+            </div>
+            <div class="flex items-center gap-2 no-print">
+              <button onclick="setTab('relatorios')" class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Relatórios & Comissões
+              </button>
+              <button onclick="openNewLeadModal()" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow transition">
+                <i data-lucide="plus" class="w-4 h-4"></i> Nova Oportunidade
+              </button>
+            </div>
+          </div>
+
+          ${renderCrossFilterBar()}
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-card p-5 rounded-2xl border-2 border-blue-500/30 shadow-sm relative overflow-hidden bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/20">
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Forecast Ponderado</span>
+              <div class="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-2">${formatBRLShort(mrrForecastPonderado)}<span class="text-xs font-normal text-slate-500">/mês</span></div>
+              <div class="text-xs text-slate-500 mt-1">Previsão calculada por probabilidade</div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pipeline Total Filtrado</span>
+              <div class="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-2">${formatBRLShort(mrrPipelineBruto)}<span class="text-xs font-normal text-slate-500">/mês</span></div>
+              <div class="text-xs text-slate-500 mt-1">${leadsEmAberto.length} oportunidades correspondentes</div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">MRR Ativo em Carteira</span>
+              <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">${formatBRLShort(mrrAtivoJornada)}</div>
+              <div class="text-xs text-slate-500 mt-1">${db.jornada.length} contratos na Jornada</div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Fila Urgente</span>
+              <div class="text-2xl font-extrabold text-rose-600 mt-2">${leadsPorAtender}</div>
+              <div class="text-xs text-slate-500 mt-1"><a onclick="setTab('atendimento')" class="cursor-pointer hover:underline text-rose-600 font-semibold">Atender agora ➔</a></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="glass-card lg:col-span-2 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-bold text-base text-slate-900 dark:text-white">Evolução do Faturamento Recorrente (MRR)</h3>
+                  <p class="text-xs text-slate-500">Histórico de receita com projeção de Forecast</p>
+                </div>
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 border border-blue-200">Motion Dinâmico</span>
+              </div>
+              <div class="h-64 w-full relative"><canvas id="chart-dashboard-mrr"></canvas></div>
+            </div>
+
+            <!-- Gráfico de Receita por Canal de Origem -->
+            <div class="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-bold text-base text-slate-900 dark:text-white">Receita por Canal de Origem</h3>
+                  <p class="text-xs text-slate-500">Qual fonte traz mais receita</p>
+                </div>
+                <i data-lucide="compass" class="w-5 h-5 text-indigo-500"></i>
+              </div>
+              <div class="h-52 w-full relative flex items-center justify-center"><canvas id="chart-dashboard-sources"></canvas></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      initDashboardCharts(db, leadsEmAberto);
+    }
+
+    function initDashboardCharts(db, leads) {
+      const ctxMRR = document.getElementById('chart-dashboard-mrr');
+      if (ctxMRR) {
+        const mrrAtual = db.jornada.reduce((acc, c) => acc + (+c.mrr || 0), 0);
+        dynamicCharts['mrr'] = new Chart(ctxMRR, {
+          type: 'line',
+          data: {
+            labels: ['Mai', 'Jun', 'Jul', 'Ago', 'Set (Atual)', 'Out (Forecast)'],
+            datasets: [{
+              label: 'MRR',
+              data: [Math.round(mrrAtual * 0.45), Math.round(mrrAtual * 0.60), Math.round(mrrAtual * 0.78), Math.round(mrrAtual * 0.90), mrrAtual, Math.round(mrrAtual * 1.30)],
+              borderColor: '#0176d3',
+              borderWidth: 3,
+              backgroundColor: 'rgba(1, 118, 211, 0.08)',
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: '#0176d3',
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 1000 },
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { ticks: { callback: v => 'R$ ' + v, font: { size: 10 } }, grid: { color: 'rgba(156,163,175,0.1)' } },
+              x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+            }
+          }
+        });
+      }
+
+      const ctxSources = document.getElementById('chart-dashboard-sources');
+      if (ctxSources) {
+        const srcKeys = Object.keys(SOURCES);
+        const dataVals = srcKeys.map(k => {
+          return db.leads.filter(l => (l.source || 'instagram') === k).reduce((acc, l) => acc + (+l.value || 0), 0);
+        });
+
+        dynamicCharts['sources'] = new Chart(ctxSources, {
+          type: 'doughnut',
+          data: {
+            labels: srcKeys.map(k => SOURCES[k].label),
+            datasets: [{
+              data: dataVals.map(v => v || 1000),
+              backgroundColor: ['#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+              borderWidth: 2,
+              borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            cutout: '70%'
+          }
+        });
+      }
+    }
+
+    /* ==========================================================================
+       TELA: PROPOSTAS COM O NOVO SIMULADOR DE PACOTES
+       ========================================================================== */
+    function renderPropostas(container) {
+      const db = loadDB();
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Propostas & Simulador de Pacotes</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Simule preços de tabela para redes sociais e gere propostas na hora.</p>
+            </div>
+            <button onclick="openNewProposalModal()" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow transition no-print">
+              <i data-lucide="plus" class="w-4 h-4"></i> Nova Proposta Manual
+            </button>
+          </div>
+
+          <!-- SIMULADOR INTERATIVO DE PACOTES -->
+          <div class="glass-card p-6 rounded-2xl border-2 border-indigo-200 dark:border-indigo-950/80 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-indigo-100 dark:border-indigo-900/40">
+              <div class="flex items-center gap-2">
+                <i data-lucide="calculator" class="w-5 h-5 text-indigo-600"></i>
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white">Simulador de Pacote de Agência (Tabela de Preços)</h3>
+              </div>
+              <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">Orçamento Rápido</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
+              <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">Posts no Feed por Semana</label>
+                <select id="sim-posts" onchange="calcSimulador()" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white">
+                  <option value="2">2 posts/semana (~8 mês)</option>
+                  <option value="3" selected>3 posts/semana (~12 mês)</option>
+                  <option value="5">5 posts/semana (~20 mês)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">Reels / TikTok em Vídeo por Mês</label>
+                <select id="sim-reels" onchange="calcSimulador()" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white">
+                  <option value="4">4 Reels profissionais/mês</option>
+                  <option value="8" selected>8 Reels profissionais/mês</option>
+                  <option value="12">12 Reels profissionais/mês</option>
+                </select>
+              </div>
+
+              <div class="flex flex-col justify-center space-y-2">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="sim-trafego" onchange="calcSimulador()" checked class="w-4 h-4 text-indigo-600 rounded">
+                  <span class="font-semibold text-slate-700 dark:text-slate-300">Gestão de Tráfego Ads (+R$ 1.200)</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="sim-site" onchange="calcSimulador()" class="w-4 h-4 text-indigo-600 rounded">
+                  <span class="font-semibold text-slate-700 dark:text-slate-300">Manutenção de Site (+R$ 500)</span>
+                </label>
+              </div>
+
+              <div class="bg-indigo-50 dark:bg-indigo-950/40 p-4 rounded-xl border border-indigo-200 dark:border-indigo-900/60 flex flex-col justify-between">
+                <div>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase">Mensalidade Sugerida</span>
+                  <div class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5" id="sim-resultado-display">R$ 3.250,00/mês</div>
+                </div>
+                <button onclick="aplicarSimuladorNaProposta()" class="mt-2 w-full px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs shadow transition">
+                  Gerar Proposta Oficial ➔
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela de Propostas Existentes -->
+          <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white">Propostas Cadastradas (${db.propostas.length})</h3>
+            </div>
+            <div class="divide-y divide-slate-100 dark:divide-slate-800">
+              ${db.propostas.map(p => `
+                <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h4 class="font-bold text-sm text-slate-900 dark:text-white">${sanitize(p.clientName)}</h4>
+                      <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${p.status === 2 ? 'bg-emerald-100 text-emerald-700' : p.status === 1 ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}">
+                        ${PROP_STATUS[p.status]}
+                      </span>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-1">Itens: ${p.items.map(i => `${i.qty}x ${sanitize(i.desc)}`).join(', ')}</div>
+                  </div>
+
+                  <div class="flex items-center gap-4">
+                    <div class="text-right">
+                      <div class="text-base font-extrabold text-emerald-600">${formatBRL(p.totalMRR)}/mês</div>
+                      ${p.discount > 0 ? `<div class="text-[10px] text-slate-400">Desconto de ${p.discount}%</div>` : ''}
+                    </div>
+                    <div class="flex items-center gap-1 no-print">
+                      <button onclick="changePropStatus('${p.id}', 1)" class="px-2.5 py-1 text-xs font-semibold rounded-lg ${p.status === 1 ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'}">
+                        Enviada
+                      </button>
+                      <button onclick="changePropStatus('${p.id}', 2)" class="px-2.5 py-1 text-xs font-semibold rounded-lg ${p.status === 2 ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'}">
+                        Aprovar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `).join('') || '<div class="text-center py-12 text-slate-400 text-xs">Nenhuma proposta cadastrada ainda.</div>'}
+            </div>
+          </div>
+        </div>
+      `;
+
+      calcSimulador();
+    }
+
+    function changePropStatus(id, newStatus) {
+      const db = loadDB();
+      const prop = db.propostas.find(p => p.id === id);
+      if (prop) {
+        prop.status = newStatus;
+        if (newStatus === 2 && prop.leadId) {
+          const lead = db.leads.find(l => l.id === prop.leadId);
+          if (lead) setLeadStage(lead.id, 4);
+        }
+        saveDB(db);
+        if (currentTab === 'propostas') renderPropostas(document.getElementById('app-view'));
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    /* ==========================================================================
+       DEMAIS TELAS (FUNIL, ATENDIMENTO, EQUIPE, TAREFAS, ETC)
+       ========================================================================== */
+    function renderFunil(container) {
+      const db = loadDB();
+      const openStages = STAGES.filter(s => s.id <= 4);
+      const filteredLeads = applyCrossFilter(db.leads, db);
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Funil de Vendas & Scoring</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Arraste ou avance cards e cruze dados em tempo real.</p>
+            </div>
+            <button onclick="openNewLeadModal()" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow transition no-print">
+              <i data-lucide="plus" class="w-4 h-4"></i> Nova Oportunidade
+            </button>
+          </div>
+
+          ${renderCrossFilterBar()}
+
+          <div class="glass-card p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center gap-6">
+            <div class="w-full md:w-1/3">
+              <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">Volume de MRR por Etapa</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Distribuição financeira filtrada</p>
+            </div>
+            <div class="w-full md:w-2/3 h-28 relative"><canvas id="chart-funnel-header"></canvas></div>
+          </div>
+
+          <div class="flex gap-4 overflow-x-auto pb-6 pt-1">
+            ${openStages.map(stage => {
+              const leadsInStage = filteredLeads.filter(l => l.stage === stage.id);
+              const totalVal = leadsInStage.reduce((acc, l) => acc + (+l.value || 0), 0);
+
+              return `
+                <div class="kanban-col flex-shrink-0 bg-slate-100 dark:bg-slate-900/90 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 flex flex-col max-h-[750px]">
+                  <div class="pb-3 px-1 border-b border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between">
+                      <div class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">${stage.name}</div>
+                      <span class="text-xs px-2 py-0.5 rounded-full ${stage.badge} font-bold">${leadsInStage.length}</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1 text-[11px]">
+                      <span class="font-bold text-emerald-600">${formatBRLShort(totalVal)}</span>
+                      <span class="text-slate-400">Prob: <b>${Math.round(stage.prob * 100)}%</b></span>
+                    </div>
+                  </div>
+
+                  <div class="space-y-2.5 mt-3 overflow-y-auto flex-1 pr-1">
+                    ${leadsInStage.map(lead => {
+                      const scoreInfo = calcLeadScore(lead, db);
+                      const stalled = isStalled(lead);
+                      const isSelected = bulkSelectedLeadIds.has(lead.id);
+                      const srcObj = SOURCES[lead.source || 'instagram'] || SOURCES['instagram'];
+
+                      return `
+                        <div class="bg-white dark:bg-slate-800 rounded-xl p-3.5 border-l-4 ${stage.color} border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                          <div class="flex items-start justify-between gap-1">
+                            <div class="flex items-start gap-2">
+                              <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleBulkSelect('${lead.id}')" class="mt-1 w-4 h-4 text-blue-600 rounded cursor-pointer no-print">
+                              <div>
+                                <h5 class="font-bold text-sm text-slate-900 dark:text-white cursor-pointer hover:text-blue-600 transition" onclick="openDetailsModal('${lead.id}')">
+                                  ${sanitize(lead.name)}
+                                </h5>
+                                <div class="text-xs text-slate-500 truncate">${sanitize(lead.company)}</div>
+                              </div>
+                            </div>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${scoreInfo.class}">${scoreInfo.label}</span>
+                          </div>
+
+                          <div class="mt-2 flex items-center justify-between text-[11px]">
+                            <span class="text-purple-600 dark:text-purple-400 font-semibold flex items-center gap-1">
+                              <i data-lucide="user" class="w-3 h-3"></i> ${sanitize(getColabName(lead.assignedTo, db))}
+                            </span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded border ${srcObj.color}">
+                              ${srcObj.label}
+                            </span>
+                          </div>
+
+                          ${stalled ? `
+                            <div class="mt-2 text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/50 px-2 py-1 rounded-lg border border-amber-200">
+                              ⚠️ Estagnado há ${getStalledDays(lead)} dias
+                            </div>
+                          ` : ''}
+
+                          <div class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700/80 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-800 dark:text-slate-100">${formatBRLShort(lead.value)}/mês</span>
+                            <div class="flex items-center gap-1 no-print">
+                              <button onclick="openWhatsAppScriptsModal('${lead.id}')" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Disparar Script WhatsApp">
+                                <i data-lucide="message-square" class="w-4 h-4"></i>
+                              </button>
+                              <button onclick="moveLead('${lead.id}', -1)" ${stage.id === 0 ? 'disabled class="opacity-20"' : 'class="p-1 text-slate-400 hover:text-slate-700"'}>
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                              </button>
+                              <button onclick="moveLead('${lead.id}', 1)" ${stage.id === 4 ? 'disabled class="opacity-20"' : 'class="p-1 text-slate-400 hover:text-slate-700"'}>
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      `;
+                    }).join('') || '<div class="text-center py-8 text-xs text-slate-400">Nenhum lead nesta etapa</div>'}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      initFunnelHeaderChart(openStages, filteredLeads);
+      updateBulkActionBar();
+    }
+
+    function initFunnelHeaderChart(stages, leads) {
+      const ctx = document.getElementById('chart-funnel-header');
+      if (!ctx) return;
+      const dataVals = stages.map(s => {
+        const inStage = leads.filter(l => l.stage === s.id);
+        return inStage.reduce((acc, l) => acc + (+l.value || 0), 0);
+      });
+      dynamicCharts['funnel-header'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: stages.map(s => s.name),
+          datasets: [{ data: dataVals, backgroundColor: ['#3b82f6', '#f59e0b', '#6366f1', '#a855f7', '#10b981'], borderRadius: 6 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { callback: v => 'R$ ' + v, font: { size: 9 } }, grid: { display: false } },
+            x: { ticks: { font: { size: 9 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderEquipe(container) {
+      const db = loadDB();
+      const colabs = db.colaboradores || [];
+      const currentSelected = selectedColabView === 'all' ? colabs[0] : colabs.find(c => c.id === selectedColabView) || colabs[0];
+      const colabLeads = db.leads.filter(l => l.assignedTo === currentSelected.id);
+      const colabWon = colabLeads.filter(l => l.stage === 4);
+      const colabMRRReal = colabWon.reduce((acc, l) => acc + (+l.value || 0), 0);
+      const colabPipeline = colabLeads.filter(l => l.stage < 4).reduce((acc, l) => acc + (+l.value || 0), 0);
+      const colabTasks = colabLeads.filter(l => l.nextStep && !l.nextStepDone);
+      const meta = currentSelected.metaMRR || 10000;
+      const pctMeta = Math.min(100, Math.round((colabMRRReal / meta) * 100));
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Área de Colaboradores</h1>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border border-purple-800">Gestão Individual</span>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Mesa de trabalho individual e metas da equipe.</p>
+            </div>
+            
+            <div class="flex items-center gap-2 no-print">
+              <span class="text-xs font-bold text-slate-500 uppercase">Mesa de:</span>
+              <select onchange="selectedColabView=this.value; renderEquipe(document.getElementById('app-view'))" class="px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold dark:text-white shadow-sm">
+                ${colabs.map(c => `<option value="${c.id}" ${c.id === currentSelected.id ? 'selected' : ''}>👤 ${sanitize(c.name)} (${sanitize(c.role)})</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl ${currentSelected.color} text-white font-extrabold text-lg flex items-center justify-center shadow-lg">
+                  ${currentSelected.avatar}
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-slate-900 dark:text-white">${sanitize(currentSelected.name)}</h3>
+                  <div class="text-xs text-slate-500 font-medium">${sanitize(currentSelected.role)}</div>
+                  <div class="text-xs text-purple-600 font-semibold mt-1">${colabLeads.length} leads sob gestão</div>
+                </div>
+              </div>
+
+              <div class="w-full md:w-80">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="font-bold text-slate-700 dark:text-slate-300">Meta Mensal de MRR</span>
+                  <span class="font-bold text-purple-600">${formatBRLShort(colabMRRReal)} / ${formatBRLShort(meta)} (${pctMeta}%)</span>
+                </div>
+                <div class="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full" style="width: ${pctMeta}%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center gap-6">
+            <div class="w-full md:w-1/3">
+              <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">Comparativo de Fechamentos</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">MRR Fechado por cada membro</p>
+            </div>
+            <div class="w-full md:w-2/3 h-28 relative"><canvas id="chart-colab-comparison"></canvas></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                  <i data-lucide="filter" class="w-4 h-4 text-blue-500"></i> Leads Atribuídos (${colabLeads.length})
+                </h4>
+                <span class="text-xs font-bold text-emerald-600">Pipeline: ${formatBRLShort(colabPipeline)}</span>
+              </div>
+              <div class="mt-4 space-y-2.5 overflow-y-auto max-h-80 pr-1">
+                ${colabLeads.map(l => `
+                  <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-xs text-slate-900 dark:text-white cursor-pointer hover:text-blue-600 transition" onclick="openDetailsModal('${l.id}')">${sanitize(l.name)}</div>
+                      <div class="text-[11px] text-slate-500">${sanitize(l.company)} · ${STAGES[l.stage].name}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-emerald-600">${formatBRLShort(l.value)}</span>
+                      <button onclick="openWhatsAppScriptsModal('${l.id}')" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded" title="Script WhatsApp">
+                        <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </div>
+                `).join('') || '<div class="text-center py-8 text-xs text-slate-400">Nenhum lead atribuído.</div>'}
+              </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                  <i data-lucide="check-square" class="w-4 h-4 text-teal-500"></i> Follow-ups Pendentes (${colabTasks.length})
+                </h4>
+              </div>
+              <div class="mt-4 space-y-2.5 overflow-y-auto max-h-80 pr-1">
+                ${colabTasks.map(l => `
+                  <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-xs text-slate-900 dark:text-white">${sanitize(l.nextStep)}</div>
+                      <div class="text-[11px] text-slate-500">${sanitize(l.name)} · Prazo: ${l.nextStepDate || 'Hoje'}</div>
+                    </div>
+                    <a href="https://wa.me/55${sanitize(l.phone).replace(/\D/g, '')}" target="_blank" class="p-2 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 transition">
+                      <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                    </a>
+                  </div>
+                `).join('') || '<div class="text-center py-8 text-xs text-slate-400">Nenhum follow-up pendente.</div>'}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      initColabComparisonChart(colabs, db);
+    }
+
+    function initColabComparisonChart(colabs, db) {
+      const ctx = document.getElementById('chart-colab-comparison');
+      if (!ctx) return;
+      dynamicCharts['colab-chart'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: colabs.map(c => c.name.split(' ')[0]),
+          datasets: [{
+            data: colabs.map(c => db.leads.filter(l => l.assignedTo === c.id && l.stage === 4).reduce((acc, l) => acc + (+l.value || 0), 0)),
+            backgroundColor: ['#2563eb', '#9333ea', '#059669'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { callback: v => 'R$ ' + v, font: { size: 9 } }, grid: { display: false } },
+            x: { ticks: { font: { size: 9 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderAtendimento(container) {
+      const db = loadDB();
+      const filteredLeads = applyCrossFilter(db.leads.filter(l => l.stage < 4), db);
+      const porAtender = filteredLeads.filter(l => !l.attended);
+      const atendidos = filteredLeads.filter(l => l.attended);
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Fila de Atendimento</h1>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${porAtender.length > 0 ? 'bg-rose-500 text-white shadow' : 'bg-emerald-500 text-white'}">
+                  ${porAtender.length} aguardando
+                </span>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Atenda com agilidade contatos de WhatsApp e Instagram.</p>
+            </div>
+            <button onclick="openNewLeadModal()" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow transition no-print">
+              <i data-lucide="plus" class="w-4 h-4"></i> Novo Contato
+            </button>
+          </div>
+
+          ${renderCrossFilterBar()}
+
+          <div class="glass-card p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">Velocidade da Fila</h4>
+              <p class="text-[11px] text-slate-500">${porAtender.length} aguardando contato vs. ${atendidos.length} já atendidos</p>
+            </div>
+            <div class="w-32 h-20 relative"><canvas id="chart-atendimento-donut"></canvas></div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-card p-5 rounded-2xl border-2 border-rose-200 dark:border-rose-950/80 shadow-sm flex flex-col">
+              <div class="flex items-center justify-between pb-3 border-b border-rose-100 dark:border-rose-900/40">
+                <span class="text-rose-600 dark:text-rose-400 font-bold text-sm flex items-center gap-2">
+                  <i data-lucide="alert-circle" class="w-4 h-4"></i> 🚨 POR ATENDER (${porAtender.length})
+                </span>
+                <span class="text-xs text-rose-500 font-medium">Prioridade máxima</span>
+              </div>
+
+              <div class="mt-4 space-y-3 flex-1 overflow-y-auto max-h-[650px] pr-1">
+                ${porAtender.map(l => {
+                  const scoreInfo = calcLeadScore(l, db);
+                  const isSelected = bulkSelectedLeadIds.has(l.id);
+                  return `
+                    <div class="p-4 bg-white dark:bg-slate-900 rounded-xl border border-rose-100 dark:border-rose-900/40 shadow-sm hover:shadow transition">
+                      <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-start gap-2">
+                          <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleBulkSelect('${l.id}')" class="mt-1 w-4 h-4 text-blue-600 rounded cursor-pointer no-print">
+                          <div>
+                            <h4 class="font-bold text-sm text-slate-900 dark:text-white">${sanitize(l.name)}</h4>
+                            <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
+                              <span>${sanitize(l.company)}</span>
+                              <span>•</span>
+                              <span class="text-rose-600 font-semibold">${timeAgo(l.createdAt)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${scoreInfo.class}">${scoreInfo.label}</span>
+                      </div>
+
+                      <div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <span class="text-xs font-bold text-emerald-600">${formatBRLShort(l.value)}/mês</span>
+                        <div class="flex items-center gap-2 no-print">
+                          <button onclick="openWhatsAppScriptsModal('${l.id}')" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Scripts WA
+                          </button>
+                          <button onclick="markAttended('${l.id}', true)" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium">✓</button>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('') || '<div class="text-center py-12 text-slate-400 text-sm">🎉 Todos os leads atendidos!</div>'}
+              </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <span class="text-emerald-600 dark:text-emerald-400 font-bold text-sm flex items-center gap-2">
+                  <i data-lucide="check-circle-2" class="w-4 h-4"></i> ✅ JÁ ATENDIDOS (${atendidos.length})
+                </span>
+                <span class="text-xs text-slate-500">Em qualificação ou proposta</span>
+              </div>
+
+              <div class="mt-4 space-y-3 flex-1 overflow-y-auto max-h-[650px] pr-1">
+                ${atendidos.map(l => `
+                  <div class="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow transition">
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white cursor-pointer hover:text-blue-600 transition" onclick="openDetailsModal('${l.id}')">${sanitize(l.name)}</h4>
+                        <div class="text-xs text-slate-500 mt-0.5">${sanitize(l.company)} · Responsável: <b>${sanitize(getColabName(l.assignedTo, db))}</b></div>
+                      </div>
+                      <span class="text-xs font-bold text-emerald-600">${formatBRLShort(l.value)}/mês</span>
+                    </div>
+
+                    <div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 no-print">
+                      <button onclick="openWhatsAppScriptsModal('${l.id}')" class="text-xs text-emerald-600 font-bold flex items-center gap-1 hover:underline">
+                        <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Script WhatsApp
+                      </button>
+                      <button onclick="markAttended('${l.id}', false)" class="text-[11px] text-slate-400 hover:text-rose-500 transition">Reabrir Fila</button>
+                    </div>
+                  </div>
+                `).join('') || '<div class="text-center py-12 text-slate-400 text-sm">Nenhum lead atendido ainda.</div>'}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      initAtendimentoDonut(porAtender.length, atendidos.length);
+      updateBulkActionBar();
+    }
+
+    function initAtendimentoDonut(pending, done) {
+      const ctx = document.getElementById('chart-atendimento-donut');
+      if (!ctx) return;
+      dynamicCharts['atend-donut'] = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Por Atender', 'Atendidos'],
+          datasets: [{ data: [pending || 1, done || 1], backgroundColor: ['#f43f5e', '#10b981'], borderWidth: 1 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          cutout: '70%'
+        }
+      });
+    }
+
+    function renderJornada(container) {
+      const db = loadDB();
+      const totalMRRJornada = db.jornada.reduce((acc, c) => acc + (+c.mrr || 0), 0);
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Jornada do Cliente</h1>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200">Customer Success</span>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Controle o ciclo de vida após o fechamento.</p>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-slate-400 uppercase font-semibold">MRR em Gestão</div>
+              <div class="text-lg font-extrabold text-emerald-600">${formatBRL(totalMRRJornada)}/mês</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            ${JOURNEY_STAGES.map(stage => {
+              const clientsInStage = db.jornada.filter(j => j.stage === stage.id);
+              return `
+                <div class="glass-card p-4 rounded-2xl border-t-4 ${stage.color} border border-slate-200 dark:border-slate-800 flex flex-col max-h-[750px]">
+                  <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                      <h4 class="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">${stage.name}</h4>
+                      <p class="text-[11px] text-slate-400 mt-0.5">${stage.desc}</p>
+                    </div>
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">${clientsInStage.length}</span>
+                  </div>
+
+                  <div class="mt-3 space-y-3 overflow-y-auto flex-1 pr-1">
+                    ${clientsInStage.map(client => `
+                      <div class="p-3.5 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow transition">
+                        <div class="flex items-start justify-between">
+                          <div>
+                            <h5 class="font-bold text-sm text-slate-900 dark:text-white">${sanitize(client.clientName)}</h5>
+                            <span class="text-xs text-slate-500">${sanitize(client.company)}</span>
+                          </div>
+                          <span class="text-xs font-bold text-emerald-600">${formatBRLShort(client.mrr)}</span>
+                        </div>
+                        <div class="mt-2 text-xs flex items-center justify-between text-slate-500">
+                          <span>Renovação:</span>
+                          <span class="font-semibold text-purple-600 dark:text-purple-400">${client.renewalDate || 'Sem data'}</span>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between no-print">
+                          <button onclick="moveJourneyClient('${client.id}', -1)" ${stage.id === 0 ? 'disabled class="opacity-20"' : 'class="p-1 text-slate-400 hover:text-slate-700"'}>
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                          </button>
+                          <span class="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ativo
+                          </span>
+                          <button onclick="moveJourneyClient('${client.id}', 1)" ${stage.id === 3 ? 'disabled class="opacity-20"' : 'class="p-1 text-slate-400 hover:text-slate-700"'}>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                          </button>
+                        </div>
+                      </div>
+                    `).join('') || '<div class="text-center py-10 text-xs text-slate-400">Nenhum cliente nesta fase.</div>'}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function moveJourneyClient(id, delta) {
+      const db = loadDB();
+      const client = db.jornada.find(j => j.id === id);
+      if (client) {
+        client.stage = Math.max(0, Math.min(3, client.stage + delta));
+        saveDB(db);
+        if (currentTab === 'jornada') renderJornada(document.getElementById('app-view'));
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function renderTarefas(container) {
+      const db = loadDB();
+      const today = new Date().toISOString().split('T')[0];
+      const tasks = db.leads.filter(l => l.nextStep).map(l => ({
+        lead: l,
+        overdue: !l.nextStepDone && l.nextStepDate < today,
+        isToday: !l.nextStepDone && l.nextStepDate === today,
+        done: l.nextStepDone
+      })).sort((a,b) => (a.lead.nextStepDate || '').localeCompare(b.lead.nextStepDate || ''));
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Tarefas & Follow-up Diário</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Nunca perca o timing de uma ligação ou proposta comercial.</p>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white">Lista de Follow-ups Agendados (${tasks.length})</h3>
+            </div>
+            <div class="divide-y divide-slate-100 dark:divide-slate-800">
+              ${tasks.map(t => `
+                <div class="p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+                  <div class="flex items-center gap-3">
+                    <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskDone('${t.lead.id}')" class="w-5 h-5 text-blue-600 rounded cursor-pointer no-print">
+                    <div>
+                      <div class="font-bold text-sm text-slate-900 dark:text-white ${t.done ? 'line-through text-slate-400' : ''}">
+                        ${sanitize(t.lead.nextStep)}
+                      </div>
+                      <div class="text-xs text-slate-500 mt-0.5">
+                        Lead: <b class="text-blue-600 cursor-pointer hover:underline" onclick="openDetailsModal('${t.lead.id}')">${sanitize(t.lead.name)}</b> · Colaborador: <b>${sanitize(getColabName(t.lead.assignedTo, db))}</b>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${t.overdue ? 'bg-rose-100 text-rose-700' : t.isToday ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}">
+                      ${t.overdue ? '⚠️ Atrasado' : t.isToday ? '⏰ Hoje' : '📅 ' + (t.lead.nextStepDate || 'Sem data')}
+                    </span>
+                    <button onclick="openWhatsAppScriptsModal('${t.lead.id}')" class="p-2 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 transition no-print" title="Disparar WhatsApp">
+                      <i data-lucide="message-square" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+              `).join('') || '<div class="text-center py-12 text-xs text-slate-400">Nenhuma tarefa agendada no momento.</div>'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleTaskDone(leadId) {
+      const db = loadDB();
+      const lead = db.leads.find(l => l.id === leadId);
+      if (lead) {
+        lead.nextStepDone = !lead.nextStepDone;
+        saveDB(db);
+        if (currentTab === 'tarefas') renderTarefas(document.getElementById('app-view'));
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    // Exportadores
+    function downloadCSV(filename, content) {
+      const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportComissoesCSV() {
+      const db = loadDB();
+      const colabs = db.colaboradores || [];
+      let csv = 'Colaborador;Cargo;Meta Mensal (R$);MRR Fechado (R$);% Meta;% Comissao;Comissao a Pagar (R$)\n';
+      colabs.forEach(c => {
+        const wonLeads = db.leads.filter(l => l.assignedTo === c.id && l.stage === 4);
+        const mrrReal = wonLeads.reduce((acc, l) => acc + (+l.value || 0), 0);
+        const meta = c.metaMRR || 10000;
+        const pct = Math.min(100, Math.round((mrrReal / meta) * 100));
+        const comissaoPct = c.comissaoPct != null ? c.comissaoPct : 10;
+        const valComissao = Math.round(mrrReal * (comissaoPct / 100));
+        csv += `"${c.name}";"${c.role}";"${meta}";"${mrrReal}";"${pct}%";"${comissaoPct}%";"${valComissao}"\n`;
+      });
+      downloadCSV(`MeuCRM_Comissoes_${new Date().toISOString().slice(0,10)}.csv`, csv);
+    }
+
+    function exportPipelineCSV() {
+      const db = loadDB();
+      let csv = 'Nome do Contato;Empresa;WhatsApp;Serviço;Canal;Valor Mensal (R$);Etapa;Probabilidade;Forecast Ponderado (R$);Colaborador;Score\n';
+      db.leads.forEach(l => {
+        const stageObj = STAGES[l.stage] || STAGES[0];
+        const weighted = Math.round((+l.value || 0) * stageObj.prob);
+        const scoreInfo = calcLeadScore(l, db);
+        csv += `"${l.name}";"${l.company || ''}";"${l.phone}";"${serviceName(l.service)}";"${l.source || 'instagram'}";"${l.value}";"${stageObj.name}";"${Math.round(stageObj.prob * 100)}%";"${weighted}";"${getColabName(l.assignedTo, db)}";"${scoreInfo.score}"\n`;
+      });
+      downloadCSV(`MeuCRM_Pipeline_${new Date().toISOString().slice(0,10)}.csv`, csv);
+    }
+
+    function exportContratosCSV() {
+      const db = loadDB();
+      let csv = 'Cliente;Empresa;MRR Mensal (R$);Serviço;Fase da Jornada;Data de Inicio;Data de Renovacao;Saude;Colaborador\n';
+      db.jornada.forEach(j => {
+        const stageObj = JOURNEY_STAGES[j.stage] || JOURNEY_STAGES[0];
+        csv += `"${j.clientName}";"${j.company || ''}";"${j.mrr}";"${serviceName(j.service)}";"${stageObj.name}";"${j.startDate}";"${j.renewalDate}";"${j.health}";"${getColabName(j.assignedTo, db)}"\n`;
+      });
+      downloadCSV(`MeuCRM_Contratos_${new Date().toISOString().slice(0,10)}.csv`, csv);
+    }
+
+    function renderRelatorios(container) {
+      const db = loadDB();
+      const colabs = db.colaboradores || [];
+      const leadsGanhos = db.leads.filter(l => l.stage === 4);
+      const totalMRRGanho = leadsGanhos.reduce((acc, l) => acc + (+l.value || 0), 0);
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Relatórios & Comissões</h1>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">Exportação Excel & PDF</span>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Calcule comissões por colaborador e exporte relatórios consolidados.</p>
+            </div>
+            <div class="flex items-center gap-2 no-print">
+              <button onclick="exportComissoesCSV()" class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar Comissões (Excel)
+              </button>
+              <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-xl text-xs font-bold shadow transition">
+                <i data-lucide="printer" class="w-4 h-4"></i> Imprimir / Salvar PDF
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">MRR Total Fechado</span>
+              <div class="text-2xl font-extrabold text-emerald-600 mt-2">${formatBRLShort(totalMRRGanho)}/mês</div>
+              <div class="text-xs text-slate-500 mt-1">${leadsGanhos.length} contratos assinados</div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total de Comissões</span>
+              <div class="text-2xl font-extrabold text-purple-600 dark:text-purple-400 mt-2" id="total-comissao-display">R$ 0,00</div>
+              <div class="text-xs text-slate-500 mt-1">A pagar aos colaboradores</div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Ações Rápidas</span>
+              <div class="mt-2 flex flex-wrap gap-2 no-print">
+                <button onclick="exportPipelineCSV()" class="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold hover:bg-blue-100 transition">
+                  📥 Pipeline (CSV)
+                </button>
+                <button onclick="exportContratosCSV()" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg text-xs font-semibold hover:bg-indigo-100 transition">
+                  📥 Contratos (CSV)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 class="font-bold text-base text-slate-900 dark:text-white">Folha de Comissões por Colaborador</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 font-bold text-slate-600 dark:text-slate-400 uppercase">
+                    <th class="p-4">Colaborador</th>
+                    <th class="p-4">Cargo / Função</th>
+                    <th class="p-4">Meta Mensal</th>
+                    <th class="p-4">MRR Fechado</th>
+                    <th class="p-4">Atingimento</th>
+                    <th class="p-4">% Comissão</th>
+                    <th class="p-4 text-right">Comissão a Pagar</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:border-slate-800" id="comissoes-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+
+      renderComissoesTable();
+    }
+
+    function renderComissoesTable() {
+      const db = loadDB();
+      const colabs = db.colaboradores || [];
+      const tbody = document.getElementById('comissoes-tbody');
+      if (!tbody) return;
+
+      let totalComissoes = 0;
+
+      tbody.innerHTML = colabs.map(c => {
+        const wonLeads = db.leads.filter(l => l.assignedTo === c.id && l.stage === 4);
+        const mrrReal = wonLeads.reduce((acc, l) => acc + (+l.value || 0), 0);
+        const meta = c.metaMRR || 10000;
+        const pct = Math.min(100, Math.round((mrrReal / meta) * 100));
+        const comissaoPct = c.comissaoPct != null ? c.comissaoPct : 10;
+        const valComissao = Math.round(mrrReal * (comissaoPct / 100));
+        totalComissoes += valComissao;
+
+        return `
+          <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+            <td class="p-4 font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg ${c.color} text-white flex items-center justify-center text-[10px] font-extrabold">${c.avatar}</span>
+              ${sanitize(c.name)}
+            </td>
+            <td class="p-4 text-slate-500">${sanitize(c.role)}</td>
+            <td class="p-4 font-semibold text-slate-700 dark:text-slate-300">${formatBRLShort(meta)}</td>
+            <td class="p-4 font-bold text-emerald-600">${formatBRL(mrrReal)}</td>
+            <td class="p-4">
+              <div class="flex items-center gap-2">
+                <span class="font-bold ${pct >= 100 ? 'text-emerald-600' : 'text-slate-600'}">${pct}%</span>
+                <div class="w-16 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-purple-600" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            </td>
+            <td class="p-4">
+              <div class="flex items-center gap-1">
+                <input type="number" min="0" max="100" value="${comissaoPct}" onchange="updateColabComissao('${c.id}', this.value)" class="w-14 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-center no-print">
+                <span class="font-bold text-slate-500">%</span>
+              </div>
+            </td>
+            <td class="p-4 text-right font-extrabold text-sm text-purple-600 dark:text-purple-400">
+              ${formatBRL(valComissao)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const totalDisplay = document.getElementById('total-comissao-display');
+      if (totalDisplay) totalDisplay.textContent = formatBRL(totalComissoes);
+    }
+
+    function updateColabComissao(colabId, newPct) {
+      const db = loadDB();
+      const colab = (db.colaboradores || []).find(c => c.id === colabId);
+      if (colab) {
+        colab.comissaoPct = Math.max(0, Math.min(100, +newPct || 0));
+        saveDB(db);
+        renderComissoesTable();
+      }
+    }
+
+    function renderContatos(container) {
+      const db = loadDB();
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Base Geral de Contatos</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Pesquise, cruze dados e transfira contatos em massa.</p>
+            </div>
+            <div class="w-full sm:w-72 no-print">
+              <input type="text" id="contact-search" oninput="filterContacts(this.value)" placeholder="Buscar por nome, empresa ou fone..." class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+
+          ${renderCrossFilterBar()}
+
+          <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div id="contacts-table-container" class="divide-y divide-slate-100 dark:divide-slate-800"></div>
+          </div>
+        </div>
+      `;
+      filterContacts('');
+    }
+
+    function filterContacts(query) {
+      const db = loadDB();
+      const q = query.toLowerCase().trim();
+      const filteredByCross = applyCrossFilter(db.leads, db);
+      const filtered = filteredByCross.filter(l => 
+        (l.name || '').toLowerCase().includes(q) || 
+        (l.company || '').toLowerCase().includes(q) || 
+        (l.phone || '').includes(q)
+      );
+
+      const container = document.getElementById('contacts-table-container');
+      if (!container) return;
+
+      container.innerHTML = filtered.map(l => {
+        const scoreInfo = calcLeadScore(l, db);
+        const stageObj = STAGES[l.stage] || STAGES[0];
+        const isSelected = bulkSelectedLeadIds.has(l.id);
+        const srcObj = SOURCES[l.source || 'instagram'] || SOURCES['instagram'];
+
+        return `
+          <div class="p-4 flex items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+            <div class="flex items-center gap-3">
+              <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleBulkSelect('${l.id}')" class="w-4 h-4 text-blue-600 rounded cursor-pointer no-print">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm text-slate-900 dark:text-white cursor-pointer hover:text-blue-600 transition" onclick="openDetailsModal('${l.id}')">
+                    ${sanitize(l.name)}
+                  </span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${scoreInfo.class}">${scoreInfo.label}</span>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded border ${srcObj.color}">${srcObj.label}</span>
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">
+                  ${sanitize(l.company)} · ${sanitize(l.phone)} · Dono: <b>${sanitize(getColabName(l.assignedTo, db))}</b>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-bold text-emerald-600">${formatBRLShort(l.value)}/mês</span>
+              <button onclick="openWhatsAppScriptsModal('${l.id}')" class="p-2 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 transition no-print" title="Script WhatsApp">
+                <i data-lucide="message-square" class="w-4 h-4"></i>
+              </button>
+              <button onclick="openDetailsModal('${l.id}')" class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 transition no-print">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('') || '<div class="text-center py-10 text-xs text-slate-400">Nenhum contato encontrado.</div>';
+
+      if (window.lucide) lucide.createIcons();
+      updateBulkActionBar();
+    }
+
+        function renderConfig(container) {
+      const cfg = getSupabaseConfig();
+      const isCloud = !!supabaseClient;
+      container.innerHTML = `
+        <div class="space-y-6 max-w-3xl">
+          <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Banco de Dados, Nuvem & Segurança</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Gerencie a persistência local, conexão com Supabase e controle de acesso.</p>
+          </div>
+
+          <!-- Card Conexão Nuvem Supabase -->
+          <div class="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
+                  <i data-lucide="cloud" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-base text-slate-900 dark:text-white">Conexão Nuvem (Supabase)</h3>
+                  <p class="text-xs text-slate-500">${isCloud ? '🟢 Conectado e Sincronizado' : '🟡 Modo Local Offline'}</p>
+                </div>
+              </div>
+              <button onclick="openSupabaseModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow flex items-center gap-1.5">
+                <i data-lucide="settings" class="w-4 h-4"></i> Configurar Nuvem
+              </button>
+            </div>
+            <div class="flex items-center gap-2 pt-2">
+              <button onclick="manualSyncCloud(true)" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                <i data-lucide="upload-cloud" class="w-4 h-4 text-emerald-500"></i> Enviar Dados (Push)
+              </button>
+              <button onclick="syncPullFromSupabase()" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                <i data-lucide="download-cloud" class="w-4 h-4 text-blue-500"></i> Baixar Dados (Pull)
+              </button>
+              <button onclick="copySupabaseSQLScript()" class="px-3.5 py-2 bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                <i data-lucide="terminal" class="w-4 h-4"></i> Copiar SQL Supabase
+              </button>
+            </div>
+          </div>
+
+          <!-- Card Segurança & Senha Mestre -->
+          <div class="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 flex items-center justify-center">
+                <i data-lucide="shield" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-base text-slate-900 dark:text-white">Segurança & Senha Master</h3>
+                <p class="text-xs text-slate-500">Altere a senha mestre de acesso ao sistema.</p>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+              <input type="password" id="new-master-pwd-input" placeholder="Nova senha (mínimo 4 caracteres)" class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white">
+              <button onclick="setMasterPassword(document.getElementById('new-master-pwd-input').value)" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow">
+                Salvar Nova Senha
+              </button>
+              <button onclick="lockApp()" class="px-4 py-2.5 border border-rose-300 dark:border-rose-900/60 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                <i data-lucide="lock" class="w-4 h-4"></i> Bloquear Tela
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+            <div>
+              <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="download-cloud" class="w-5 h-5 text-blue-500"></i> Exportar Backup Completo (JSON)
+              </h3>
+              <p class="text-xs text-slate-500 mt-1">Baixe um arquivo seguro com todas as oportunidades, tarefas, colaboradores e jornada.</p>
+              <button onclick="exportBackupJSON()" class="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow transition flex items-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i> Baixar Arquivo de Backup
+              </button>
+            </div>
+
+            <div class="pt-5 border-t border-slate-100 dark:border-slate-800">
+              <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="upload-cloud" class="w-5 h-5 text-emerald-500"></i> Restaurar Backup
+              </h3>
+              <input type="file" id="backup-file-input" accept=".json" onchange="importBackupJSON(event)" class="mt-3 block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 dark:file:bg-slate-800 dark:file:text-slate-200">
+            </div>
+
+            <div class="pt-5 border-t border-slate-100 dark:border-slate-800">
+              <h3 class="font-bold text-base text-rose-600 flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i> Restaurar Dados Padrão com Colaboradores
+              </h3>
+              <button onclick="resetDefaultData()" class="mt-3 px-4 py-2 border border-rose-300 dark:border-rose-900/60 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-semibold transition">
+                Restaurar Dados Padrão
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function exportBackupJSON() {
+      const data = loadDB();
+      const str = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute('href', str);
+      a.setAttribute('download', 'MeuCRM_Backup_Equipe_' + new Date().toISOString().slice(0,10) + '.json');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function importBackupJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (parsed && parsed.leads) {
+            saveDB(parsed);
+            alert('Backup restaurado com sucesso!');
+            setTab(currentTab);
+          } else {
+            alert('Arquivo inválido.');
+          }
+        } catch (err) {
+          alert('Erro ao processar JSON.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetDefaultData() {
+      if (confirm('Deseja restaurar os dados de demonstração da equipe?')) {
+        saveDB(DEFAULT_DATA);
+        alert('Dados restaurados!');
+        setTab(currentTab);
+      }
+    }
+
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+    }
+
+    function openNewLeadModal() {
+      document.getElementById('modal-lead-title').textContent = 'Nova Oportunidade';
+      document.getElementById('lead-id').value = '';
+      document.getElementById('lead-name').value = '';
+      document.getElementById('lead-company').value = '';
+      document.getElementById('lead-phone').value = '';
+      document.getElementById('lead-value').value = '';
+      document.getElementById('lead-notes').value = '';
+      document.getElementById('lead-service').value = 'redes_sociais';
+      document.getElementById('lead-source').value = 'instagram';
+      document.getElementById('lead-nextstep').value = '';
+      document.getElementById('lead-nextstep-date').value = '';
+      document.querySelector('input[name="lead-attended"][value="false"]').checked = true;
+      document.getElementById('btn-delete-lead').classList.add('hidden');
+      populateColabSelects();
+      openModal('modal-lead');
+    }
+
+    function saveLead() {
+      const id = document.getElementById('lead-id').value;
+      const name = document.getElementById('lead-name').value.trim();
+      const phone = document.getElementById('lead-phone').value.trim();
+      if (!name || !phone) {
+        alert('Informe ao menos o Nome e o WhatsApp.');
+        return;
+      }
+
+      const db = loadDB();
+      const company = document.getElementById('lead-company').value.trim();
+      const service = document.getElementById('lead-service').value;
+      const source = document.getElementById('lead-source').value;
+      const value = +document.getElementById('lead-value').value || 0;
+      const assignedTo = document.getElementById('lead-assigned').value;
+      const notes = document.getElementById('lead-notes').value.trim();
+      const nextStep = document.getElementById('lead-nextstep').value.trim();
+      const nextStepDate = document.getElementById('lead-nextstep-date').value;
+      const attended = document.querySelector('input[name="lead-attended"]:checked').value === 'true';
+
+      if (id) {
+        const lead = db.leads.find(l => l.id === id);
+        if (lead) {
+          lead.name = name;
+          lead.company = company;
+          lead.phone = phone;
+          lead.service = service;
+          lead.source = source;
+          lead.value = value;
+          lead.assignedTo = assignedTo;
+          lead.notes = notes;
+          lead.nextStep = nextStep;
+          lead.nextStepDate = nextStepDate;
+          lead.attended = attended;
+          lead.lastContactAt = Date.now();
+        }
+      } else {
+        const newLead = {
+          id: 'lead-' + Date.now(),
+          name,
+          company,
+          phone,
+          service,
+          source: source || 'instagram',
+          value,
+          assignedTo: assignedTo || db.colaboradores[0].id,
+          stage: 0,
+          attended,
+          createdAt: Date.now(),
+          lastContactAt: Date.now(),
+          nextStep,
+          nextStepDate,
+          nextStepDone: false,
+          notes
+        };
+        db.leads.unshift(newLead);
+      }
+
+      saveDB(db);
+      closeModal('modal-lead');
+      setTab(currentTab);
+    }
+
+    function openDetailsModal(id) {
+      currentDetailsLeadId = id;
+      const db = loadDB();
+      const lead = db.leads.find(l => l.id === id);
+      if (!lead) return;
+
+      const scoreInfo = calcLeadScore(lead, db);
+      const stageObj = STAGES[lead.stage] || STAGES[0];
+      const prob = stageObj.prob;
+      const weighted = Math.round((+lead.value || 0) * prob);
+      const srcObj = SOURCES[lead.source || 'instagram'] || SOURCES['instagram'];
+
+      document.getElementById('details-name').textContent = lead.name;
+      document.getElementById('details-subtitle').textContent = `${lead.company || 'Sem empresa'} · ${lead.phone}`;
+      document.getElementById('details-mrr').textContent = formatBRL(lead.value) + '/mês';
+      document.getElementById('details-weighted').textContent = formatBRL(weighted) + '/mês';
+      document.getElementById('details-service').textContent = serviceName(lead.service);
+      document.getElementById('details-temp').textContent = scoreInfo.label;
+      document.getElementById('details-colab-name').textContent = getColabName(lead.assignedTo, db);
+      document.getElementById('details-guidance-text').textContent = stageObj.guidance;
+      document.getElementById('details-probability-text').textContent = `Probabilidade de Fechamento: ${Math.round(prob * 100)}%`;
+
+      const scoreBadge = document.getElementById('details-scoring-badge');
+      scoreBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold border ${scoreInfo.class}`;
+      scoreBadge.textContent = `Score ${scoreInfo.score}`;
+
+      const sourceBadge = document.getElementById('details-source-badge');
+      sourceBadge.className = `px-2 py-0.5 rounded-full text-[10px] font-bold border ${srcObj.color}`;
+      sourceBadge.textContent = srcObj.label;
+
+      const pathContainer = document.getElementById('salesforce-path-container');
+      pathContainer.innerHTML = STAGES.filter(s => s.id <= 4).map(s => {
+        const isActive = s.id === lead.stage;
+        const isDone = s.id < lead.stage;
+        return `
+          <div class="sf-path-step ${isActive ? 'active' : isDone ? 'completed' : ''}" onclick="setLeadStage('${lead.id}', ${s.id})">
+            <div>${s.name}</div>
+            <div class="text-[9px] opacity-80">${Math.round(s.prob * 100)}%</div>
+          </div>
+        `;
+      }).join('');
+
+      renderTimeline(id);
+      openModal('modal-details');
+    }
+
+    function moveLead(id, delta) {
+      const db = loadDB();
+      const lead = db.leads.find(l => l.id === id);
+      if (lead) {
+        const nextStage = Math.max(0, Math.min(4, lead.stage + delta));
+        setLeadStage(id, nextStage);
+      }
+    }
+
+    function setLeadStage(id, newStage) {
+      const db = loadDB();
+      const lead = db.leads.find(l => l.id === id);
+      if (lead) {
+        lead.stage = newStage;
+        lead.lastContactAt = Date.now();
+
+        if (newStage === 4) {
+          const existsInJourney = db.jornada.some(j => j.leadId === lead.id);
+          if (!existsInJourney) {
+            db.jornada.push({
+              id: 'jrn-' + Date.now(),
+              leadId: lead.id,
+              clientName: lead.name,
+              company: lead.company,
+              mrr: lead.value,
+              service: lead.service,
+              assignedTo: lead.assignedTo,
+              stage: 0,
+              startDate: new Date().toISOString().split('T')[0],
+              renewalDate: new Date(Date.now() + (1000 * 60 * 60 * 24 * 180)).toISOString().split('T')[0],
+              health: 'excelente'
+            });
+          }
+        }
+
+        saveDB(db);
+        refreshCurrentView();
+        if (currentDetailsLeadId === id) openDetailsModal(id);
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function openEditLeadFromDetails() {
+      if (!currentDetailsLeadId) return;
+      const db = loadDB();
+      const lead = db.leads.find(l => l.id === currentDetailsLeadId);
+      if (!lead) return;
+
+      closeModal('modal-details');
+      document.getElementById('modal-lead-title').textContent = 'Editar Oportunidade';
+      document.getElementById('lead-id').value = lead.id;
+      document.getElementById('lead-name').value = lead.name;
+      document.getElementById('lead-company').value = lead.company || '';
+      document.getElementById('lead-phone').value = lead.phone || '';
+      document.getElementById('lead-service').value = lead.service || 'redes_sociais';
+      document.getElementById('lead-source').value = lead.source || 'instagram';
+      document.getElementById('lead-value').value = lead.value || '';
+      document.getElementById('lead-notes').value = lead.notes || '';
+      document.getElementById('lead-nextstep').value = lead.nextStep || '';
+      document.getElementById('lead-nextstep-date').value = lead.nextStepDate || '';
+      document.querySelector(`input[name="lead-attended"][value="${lead.attended ? 'true' : 'false'}"]`).checked = true;
+      document.getElementById('btn-delete-lead').classList.remove('hidden');
+      populateColabSelects();
+      if (lead.assignedTo) document.getElementById('lead-assigned').value = lead.assignedTo;
+      openModal('modal-lead');
+    }
+
+    function deleteCurrentLead() {
+      const id = document.getElementById('lead-id').value;
+      if (!id) return;
+      if (confirm('Tem certeza que deseja excluir esta oportunidade?')) {
+        const db = loadDB();
+        db.leads = db.leads.filter(l => l.id !== id);
+        saveDB(db);
+        closeModal('modal-lead');
+        refreshCurrentView();
+      }
+    }
+
+    function markAttended(id, isAttended) {
+      const db = loadDB();
+      const lead = db.leads.find(l => l.id === id);
+      if (lead) {
+        lead.attended = isAttended;
+        lead.lastContactAt = Date.now();
+        saveDB(db);
+        refreshCurrentView();
+      }
+    }
+
+    function renderTimeline(leadId) {
+      const db = loadDB();
+      const list = (db.historico || []).filter(h => h.leadId === leadId).sort((a,b) => b.date - a.date);
+      const container = document.getElementById('details-timeline');
+      if (!container) return;
+      container.innerHTML = list.map(h => `
+        <div class="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-100 dark:border-slate-800 flex items-start gap-2.5">
+          <div class="p-1 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 mt-0.5">
+            <i data-lucide="${h.type === 'whatsapp' ? 'message-circle' : h.type === 'ligacao' ? 'phone' : 'file-text'}" class="w-3.5 h-3.5"></i>
+          </div>
+          <div class="flex-1 text-xs">
+            <div class="text-slate-800 dark:text-slate-200 font-medium">${sanitize(h.text)}</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">${timeAgo(h.date)}</div>
+          </div>
+        </div>
+      `).join('') || '<div class="text-xs text-slate-400 py-2">Nenhum histórico registrado ainda.</div>';
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function addInteraction() {
+      const text = document.getElementById('interaction-text').value.trim();
+      const type = document.getElementById('interaction-type').value;
+      if (!text || !currentDetailsLeadId) return;
+      const db = loadDB();
+      db.historico.push({
+        id: 'hist-' + Date.now(),
+        leadId: currentDetailsLeadId,
+        type,
+        text,
+        date: Date.now()
+      });
+      const lead = db.leads.find(l => l.id === currentDetailsLeadId);
+      if (lead) {
+        lead.lastContactAt = Date.now();
+        lead.attended = true;
+      }
+      saveDB(db);
+      document.getElementById('interaction-text').value = '';
+      renderTimeline(currentDetailsLeadId);
+      openDetailsModal(currentDetailsLeadId);
+    }
+
+    function convertLeadToJourney() {
+      if (!currentDetailsLeadId) return;
+      setLeadStage(currentDetailsLeadId, 4);
+      closeModal('modal-details');
+      setTab('jornada');
+    }
+
+    function openNewProposalModal() {
+      const db = loadDB();
+      const select = document.getElementById('prop-lead-id');
+      select.innerHTML = db.leads.map(l => `<option value="${l.id}">${sanitize(l.name)} – ${sanitize(l.company)}</option>`).join('');
+      const container = document.getElementById('proposal-items-container');
+      container.innerHTML = '';
+      addProposalItemRow('Gestão de Redes Sociais (Posts + Reels)', 1, 1800);
+      document.getElementById('prop-discount').value = 0;
+      calcProposalTotal();
+      openModal('modal-prop');
+    }
+
+    function addProposalItemRow(desc = '', qty = 1, unitPrice = 0) {
+      const container = document.getElementById('proposal-items-container');
+      const div = document.createElement('div');
+      div.className = 'prop-item-row flex items-center gap-2';
+      div.innerHTML = `
+        <input type="text" placeholder="Item / Serviço" value="${desc}" class="prop-item-desc flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white" oninput="calcProposalTotal()">
+        <input type="number" placeholder="Qtd" value="${qty}" class="prop-item-qty w-16 px-2 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-center dark:text-white" oninput="calcProposalTotal()">
+        <input type="number" placeholder="R$ Mensal" value="${unitPrice}" class="prop-item-val w-28 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white" oninput="calcProposalTotal()">
+        <button type="button" onclick="this.parentElement.remove(); calcProposalTotal()" class="p-2 text-rose-500 hover:text-rose-700 no-print"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      `;
+      container.appendChild(div);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function calcProposalTotal() {
+      let subtotal = 0;
+      document.querySelectorAll('.prop-item-row').forEach(row => {
+        const q = +row.querySelector('.prop-item-qty').value || 1;
+        const v = +row.querySelector('.prop-item-val').value || 0;
+        subtotal += (q * v);
+      });
+      const discount = Math.min(100, Math.max(0, +document.getElementById('prop-discount').value || 0));
+      const total = Math.round(subtotal * (1 - (discount / 100)));
+      document.getElementById('prop-total-display').textContent = formatBRL(total) + '/mês';
+      return total;
+    }
+
+    function saveProposal() {
+      const db = loadDB();
+      const leadId = document.getElementById('prop-lead-id').value;
+      const lead = db.leads.find(l => l.id === leadId);
+      if (!lead) return;
+      const items = [];
+      document.querySelectorAll('.prop-item-row').forEach(row => {
+        const desc = row.querySelector('.prop-item-desc').value.trim();
+        const qty = +row.querySelector('.prop-item-qty').value || 1;
+        const unitPrice = +row.querySelector('.prop-item-val').value || 0;
+        if (desc) items.push({ desc, qty, unitPrice });
+      });
+      if (!items.length) {
+        alert('Adicione pelo menos um item.');
+        return;
+      }
+      const totalMRR = calcProposalTotal();
+      const discount = +document.getElementById('prop-discount').value || 0;
+      db.propostas.unshift({
+        id: 'prop-' + Date.now(),
+        leadId: lead.id,
+        clientName: `${lead.name} – ${lead.company}`,
+        items,
+        discount,
+        totalMRR,
+        status: 1,
+        createdAt: Date.now()
+      });
+      lead.value = totalMRR;
+      lead.stage = Math.max(lead.stage, 2);
+      saveDB(db);
+      closeModal('modal-prop');
+      if (currentTab === 'propostas') renderPropostas(document.getElementById('app-view'));
+      else setTab(currentTab);
+    }
+
+    function toggleBulkSelect(leadId) {
+      if (bulkSelectedLeadIds.has(leadId)) bulkSelectedLeadIds.delete(leadId);
+      else bulkSelectedLeadIds.add(leadId);
+      updateBulkActionBar();
+    }
+    function updateBulkActionBar() {
+      const bar = document.getElementById('bulk-action-bar');
+      const count = document.getElementById('bulk-selected-count');
+      if (!bar) return;
+      if (bulkSelectedLeadIds.size > 0) {
+        bar.classList.remove('hidden');
+        bar.classList.add('flex');
+        count.textContent = `${bulkSelectedLeadIds.size} ${bulkSelectedLeadIds.size === 1 ? 'lead selecionado' : 'leads selecionados'}`;
+      } else {
+        bar.classList.add('hidden');
+        bar.classList.remove('flex');
+      }
+    }
+    function clearBulkSelection() {
+      bulkSelectedLeadIds.clear();
+      updateBulkActionBar();
+      refreshCurrentView();
+    }
+    function applyBulkAssign() {
+      const select = document.getElementById('bulk-assign-select');
+      const targetColabId = select.value;
+      if (!targetColabId || bulkSelectedLeadIds.size === 0) return;
+      const db = loadDB();
+      db.leads.forEach(l => {
+        if (bulkSelectedLeadIds.has(l.id)) {
+          l.assignedTo = targetColabId;
+          l.lastContactAt = Date.now();
+        }
+      });
+      saveDB(db);
+      alert(`${bulkSelectedLeadIds.size} leads transferidos com sucesso para ${getColabName(targetColabId, db)}!`);
+      clearBulkSelection();
+    }
+    function populateColabSelects() {
+      const db = loadDB();
+      const colabs = db.colaboradores || [];
+      const bulkSelect = document.getElementById('bulk-assign-select');
+      if (bulkSelect) bulkSelect.innerHTML = colabs.map(c => `<option value="${c.id}">${sanitize(c.name)} (${sanitize(c.role)})</option>`).join('');
+      const modalLeadSelect = document.getElementById('lead-assigned');
+      if (modalLeadSelect) modalLeadSelect.innerHTML = colabs.map(c => `<option value="${c.id}">${sanitize(c.name)}</option>`).join('');
+    }
+
+    const APPS = [
+      { id: 'painel', title: 'Painel & Forecast', desc: 'KPIs e previsão de faturamento', icon: 'layout-dashboard', color: 'bg-blue-600' },
+      { id: 'relatorios', title: 'Relatórios & Comissões', desc: 'Exportação Excel, PDF e folha da equipe', icon: 'file-spreadsheet', color: 'bg-emerald-600' },
+      { id: 'atendimento', title: 'Fila de Atendimento', desc: 'Leads urgentes para contato no WhatsApp', icon: 'phone-call', color: 'bg-emerald-600' },
+      { id: 'funil', title: 'Funil & Scoring', desc: 'Kanban comercial com Einstein Scoring', icon: 'filter', color: 'bg-amber-600' },
+      { id: 'equipe', title: 'Área Colaboradores', desc: 'Mesa de trabalho individual e metas', icon: 'user-check', color: 'bg-purple-600' },
+      { id: 'tarefas', title: 'Tarefas & Follow-up', desc: 'Agenda diária de ligações e retornos', icon: 'check-square', color: 'bg-teal-600' },
+      { id: 'jornada', title: 'Jornada do Cliente', desc: 'Ciclo de vida, retenção e Onboarding', icon: 'rocket', color: 'bg-indigo-600' },
+      { id: 'propostas', title: 'Propostas & Simulador', desc: 'Emissor de pacotes e MRR recorrente', icon: 'file-text', color: 'bg-sky-600' },
+      { id: 'contatos', title: 'Base Geral de Contatos', desc: 'Busca inteligente de empresas e telefones', icon: 'users', color: 'bg-cyan-600' },
+      { id: 'config', title: 'Banco & Backup', desc: 'Exportação JSON e configurações offline', icon: 'database', color: 'bg-slate-700' }
+    ];
+
+    function openAppLauncher() {
+      renderLauncherGrid('');
+      openModal('modal-app-launcher');
+      document.getElementById('launcher-search').value = '';
+    }
+    function filterLauncher(q) { renderLauncherGrid(q); }
+    function renderLauncherGrid(query) {
+      const q = query.toLowerCase().trim();
+      const filtered = APPS.filter(a => a.title.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q));
+      const grid = document.getElementById('launcher-grid');
+      if (!grid) return;
+      grid.innerHTML = filtered.map(app => `
+        <div onclick="selectApp('${app.id}')" class="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 dark:hover:border-blue-800 transition cursor-pointer flex flex-col justify-between group">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl ${app.color} text-white flex items-center justify-center shadow-md">
+              <i data-lucide="${app.icon}" class="w-4 h-4"></i>
+            </div>
+            <div class="truncate">
+              <div class="font-bold text-xs text-slate-900 dark:text-white group-hover:text-blue-600 transition truncate">${app.title}</div>
+              <div class="text-[10px] text-slate-500 truncate mt-0.5">${app.desc}</div>
+            </div>
+          </div>
+        </div>
+      `).join('') || '<div class="col-span-3 py-6 text-center text-xs text-slate-400">Nenhuma área encontrada.</div>';
+      if (window.lucide) lucide.createIcons();
+    }
+    function selectApp(id) {
+      closeModal('modal-app-launcher');
+      setTab(id);
+    }
+
+    function setTab(tabName) {
+      currentTab = tabName;
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'shadow-blue-500/20');
+        btn.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
+      });
+      const activeBtn = document.getElementById('nav-' + tabName);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
+        activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'shadow-blue-500/20');
+      }
+
+      // Destaque Ativo na Barra Mobile
+      document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+        btn.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-bold');
+        btn.classList.add('text-slate-500', 'dark:text-slate-400', 'font-medium');
+        const dot = btn.querySelector('.mobile-active-dot');
+        if (dot) dot.classList.add('hidden');
+      });
+
+      const mobileActiveBtn = document.getElementById('mobile-nav-' + tabName);
+      if (mobileActiveBtn) {
+        mobileActiveBtn.classList.remove('text-slate-500', 'dark:text-slate-400', 'font-medium');
+        mobileActiveBtn.classList.add('text-blue-600', 'dark:text-blue-400', 'font-bold');
+        const dot = mobileActiveBtn.querySelector('.mobile-active-dot');
+        if (dot) dot.classList.remove('hidden');
+      } else {
+        // Se a tela aberta for uma das telas secundárias (Jornada, Propostas, Contatos, Relatórios, Config, Tarefas)
+        const maisBtn = document.getElementById('mobile-nav-mais');
+        if (maisBtn) {
+          maisBtn.classList.remove('text-slate-500', 'dark:text-slate-400', 'font-medium');
+          maisBtn.classList.add('text-blue-600', 'dark:text-blue-400', 'font-bold');
+          const dot = maisBtn.querySelector('.mobile-active-dot');
+          if (dot) dot.classList.remove('hidden');
+        }
+      }
+
+      destroyAllCharts();
+      const main = document.getElementById('app-view');
+      if (tabName === 'painel') renderDashboard(main);
+      else if (tabName === 'atendimento') renderAtendimento(main);
+      else if (tabName === 'funil') renderFunil(main);
+      else if (tabName === 'equipe') renderEquipe(main);
+      else if (tabName === 'relatorios') renderRelatorios(main);
+      else if (tabName === 'tarefas') renderTarefas(main);
+      else if (tabName === 'jornada') renderJornada(main);
+      else if (tabName === 'propostas') renderPropostas(main);
+      else if (tabName === 'contatos') renderContatos(main);
+      else if (tabName === 'config') renderConfig(main);
+
+      if (window.lucide) lucide.createIcons();
+      updateBadges();
+      populateColabSelects();
+    }
+
+    function destroyAllCharts() {
+      Object.keys(dynamicCharts).forEach(k => {
+        if (dynamicCharts[k]) {
+          dynamicCharts[k].destroy();
+          delete dynamicCharts[k];
+        }
+      });
+    }
+
+    function updateBadges() {
+      const db = loadDB();
+      const porAtender = db.leads.filter(l => !l.attended && l.stage < 4).length;
+      const totalLeads = db.leads.filter(l => l.stage < 4).length;
+      const totalJornada = db.jornada.length;
+      const today = new Date().toISOString().split('T')[0];
+      const tarefasHoje = db.leads.filter(l => l.nextStep && !l.nextStepDone && l.nextStepDate <= today).length;
+
+      const badgeAtender = document.getElementById('badge-atender');
+      const badgeMobile = document.getElementById('badge-atender-mobile');
+      if (badgeAtender) {
+        if (porAtender > 0) {
+          badgeAtender.textContent = porAtender;
+          badgeAtender.classList.remove('hidden');
+          if (badgeMobile) badgeMobile.classList.remove('hidden');
+        } else {
+          badgeAtender.classList.add('hidden');
+          if (badgeMobile) badgeMobile.classList.add('hidden');
+        }
+      }
+
+      const bLeads = document.getElementById('badge-leads');
+      if (bLeads) bLeads.textContent = totalLeads;
+      const bTarefas = document.getElementById('badge-tarefas');
+      if (bTarefas) bTarefas.textContent = tarefasHoje;
+      const bJornada = document.getElementById('badge-jornada');
+      if (bJornada) bJornada.textContent = totalJornada;
+    }
+
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('THEME_PREF', 'light');
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('THEME_PREF', 'dark');
+      }
+      refreshCurrentView();
+    }
+
+    function initTheme() {
+      const pref = localStorage.getItem('THEME_PREF');
+      if (pref === 'dark' || (!pref && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    
+    // ==========================================
+    // AUTENTICAÇÃO, SEGURANÇA E SUPABASE CLOUD
+    // ==========================================
+    const MASTER_PWD_KEY = 'MEUCRM_MASTER_PASSWORD';
+    const AUTH_SESSION_KEY = 'MEUCRM_SESSION_ACTIVE';
+    const SUPABASE_CFG_KEY = 'MEUCRM_SUPABASE_CONFIG';
+
+    let supabaseClient = null;
+    let supabaseSyncing = false;
+
+    // Gerador de SQL completo para o Supabase
+    const SUPABASE_SQL_SCHEMA = `-- ==============================================================
+-- SCRIPT DE INICIALIZAÇÃO DO BANCO DE DADOS MEUCRM NO SUPABASE
+-- Cole este script no SQL Editor do painel do seu projeto Supabase
+-- ==============================================================
+
+-- 1. Tabela de Estado Completo Sincronizado (Sincronização 100% resiliente)
+CREATE TABLE IF NOT EXISTS crm_sync_state (
+  id TEXT PRIMARY KEY DEFAULT 'current_state',
+  full_data JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Tabela Relacional de Leads
+CREATE TABLE IF NOT EXISTS crm_leads (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  phone TEXT,
+  service TEXT,
+  source TEXT,
+  value NUMERIC DEFAULT 0,
+  stage INTEGER DEFAULT 0,
+  colab_id TEXT,
+  temperature TEXT,
+  score INTEGER DEFAULT 0,
+  notes TEXT,
+  attended BOOLEAN DEFAULT false,
+  attended_at TIMESTAMPTZ,
+  next_step TEXT,
+  next_step_date DATE,
+  next_step_done BOOLEAN DEFAULT false,
+  lost_reason TEXT,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  raw_data JSONB
+);
+
+-- 3. Tabela Relacional de Colaboradores
+CREATE TABLE IF NOT EXISTS crm_colaboradores (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  role TEXT,
+  phone TEXT,
+  meta_mrr NUMERIC DEFAULT 0,
+  comissao_pct NUMERIC DEFAULT 10,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Tabela Relacional de Jornada de Clientes
+CREATE TABLE IF NOT EXISTS crm_jornada (
+  id TEXT PRIMARY KEY,
+  lead_name TEXT NOT NULL,
+  service TEXT,
+  colab_id TEXT,
+  etapa TEXT,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5. Habilitar Políticas de Segurança (Row Level Security)
+ALTER TABLE crm_sync_state ENABLE ROW LEVEL SECURITY;
+ALTER TABLE crm_leads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE crm_colaboradores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE crm_jornada ENABLE ROW LEVEL SECURITY;
+
+-- Políticas de Acesso Público para permitir conexão direta via Anon Key
+CREATE POLICY "Permissao Total crm_sync_state" ON crm_sync_state FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permissao Total crm_leads" ON crm_leads FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permissao Total crm_colaboradores" ON crm_colaboradores FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) WITH CHECK (true);
+`;
+
+    function getMasterPassword() {
+      return localStorage.getItem(MASTER_PWD_KEY) || 'admin123';
+    }
+
+    function setMasterPassword(newPwd) {
+      if (!newPwd || newPwd.trim().length < 4) {
+        alert('A senha deve ter pelo menos 4 caracteres.');
+        return false;
+      }
+      localStorage.setItem(MASTER_PWD_KEY, newPwd.trim());
+      alert('Senha master atualizada com sucesso!');
+      return true;
+    }
+
+    function isUserAuthenticated() {
+      return sessionStorage.getItem(AUTH_SESSION_KEY) === 'true' || localStorage.getItem(AUTH_SESSION_KEY + '_REMEMBER') === 'true';
+    }
+
+    function checkAuthOnLoad() {
+      const overlay = document.getElementById('login-overlay');
+      if (!overlay) return;
+      if (isUserAuthenticated()) {
+        overlay.classList.add('hidden');
+      } else {
+        overlay.classList.remove('hidden');
+        setTimeout(() => {
+          const inp = document.getElementById('login-password-input');
+          if (inp) inp.focus();
+        }, 100);
+      }
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('login-password-input').value;
+      const remember = document.getElementById('login-remember').checked;
+      const master = getMasterPassword();
+      const errEl = document.getElementById('login-error-msg');
+
+      if (pwd === master) {
+        sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
+        if (remember) {
+          localStorage.setItem(AUTH_SESSION_KEY + '_REMEMBER', 'true');
+        }
+        const overlay = document.getElementById('login-overlay');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+      } else {
+        if (errEl) {
+          errEl.classList.remove('hidden');
+          const inp = document.getElementById('login-password-input');
+          inp.classList.add('border-rose-500', 'bg-rose-50', 'dark:bg-rose-950/20');
+          setTimeout(() => {
+            inp.classList.remove('border-rose-500', 'bg-rose-50', 'dark:bg-rose-950/20');
+          }, 2000);
+        }
+      }
+    }
+
+    function lockApp() {
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      localStorage.removeItem(AUTH_SESSION_KEY + '_REMEMBER');
+      location.reload();
+    }
+
+    function getSupabaseConfig() {
+      try {
+        const raw = localStorage.getItem(SUPABASE_CFG_KEY);
+        return raw ? JSON.parse(raw) : { url: '', anonKey: '' };
+      } catch (e) {
+        return { url: '', anonKey: '' };
+      }
+    }
+
+    function saveSupabaseConfig(url, anonKey) {
+      localStorage.setItem(SUPABASE_CFG_KEY, JSON.stringify({ url: url.trim(), anonKey: anonKey.trim() }));
+      initSupabase();
+    }
+
+    function disconnectSupabase() {
+      localStorage.removeItem(SUPABASE_CFG_KEY);
+      supabaseClient = null;
+      updateCloudStatusPill('offline');
+      updateSupabaseModalUI();
+      alert('Supabase desconectado. CRM operando no modo local offline.');
+    }
+
+    function initSupabase() {
+      const cfg = getSupabaseConfig();
+      if (cfg.url && cfg.anonKey && window.supabase) {
+        try {
+          supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+          updateCloudStatusPill('connected');
+          return true;
+        } catch (e) {
+          console.warn('Erro ao instanciar Supabase:', e);
+          supabaseClient = null;
+          updateCloudStatusPill('error');
+          return false;
+        }
+      } else {
+        supabaseClient = null;
+        updateCloudStatusPill('offline');
+        return false;
+      }
+    }
+
+    function updateCloudStatusPill(status, msg = '') {
+      const pill = document.getElementById('desktop-cloud-pill');
+      const dot = document.getElementById('desktop-cloud-dot');
+      const txt = document.getElementById('desktop-cloud-text');
+      const mobilePill = document.getElementById('mobile-cloud-pill');
+
+      if (!pill) return;
+
+      if (status === 'connected') {
+        pill.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 hover:brightness-105 transition shadow-sm';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        if (txt) txt.textContent = 'Supabase Conectado';
+        if (mobilePill) mobilePill.className = 'p-1.5 rounded-lg text-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800';
+      } else if (status === 'syncing') {
+        pill.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 transition shadow-sm';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-ping';
+        if (txt) txt.textContent = 'Sincronizando...';
+      } else if (status === 'error') {
+        pill.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/80 hover:brightness-105 transition shadow-sm';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        if (txt) txt.textContent = 'Erro na Nuvem';
+      } else {
+        pill.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 hover:brightness-105 transition shadow-sm';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+        if (txt) txt.textContent = 'Modo Offline (Local)';
+        if (mobilePill) mobilePill.className = 'p-1.5 rounded-lg text-amber-500 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800';
+      }
+    }
+
+    async function syncPushToSupabase(data = null) {
+      if (!supabaseClient) return;
+      const db = data || loadDB();
+      supabaseSyncing = true;
+      updateCloudStatusPill('syncing');
+      try {
+        const { error } = await supabaseClient
+          .from('crm_sync_state')
+          .upsert({ id: 'current_state', full_data: db, updated_at: new Date().toISOString() });
+        
+        if (error) {
+          console.warn('Sync state warning:', error);
+          updateCloudStatusPill('error');
+        } else {
+          updateCloudStatusPill('connected');
+        }
+      } catch (err) {
+        console.warn('Erro ao enviar dados para o Supabase:', err);
+        updateCloudStatusPill('error');
+      } finally {
+        supabaseSyncing = false;
+      }
+    }
+
+    async function syncPullFromSupabase() {
+      if (!supabaseClient) {
+        alert('Configure o Supabase primeiro nas configurações.');
+        return;
+      }
+      updateCloudStatusPill('syncing');
+      try {
+        const { data, error } = await supabaseClient
+          .from('crm_sync_state')
+          .select('full_data, updated_at')
+          .eq('id', 'current_state')
+          .maybeSingle();
+
+        if (error) throw error;
+        if (data && data.full_data && data.full_data.leads) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data.full_data));
+          refreshCurrentView();
+          alert('Dados atualizados com sucesso da nuvem Supabase!');
+          updateCloudStatusPill('connected');
+        } else {
+          alert('Nenhum dado encontrado na nuvem ainda. Enviando base local para o Supabase...');
+          await syncPushToSupabase();
+          alert('Base inicial enviada com sucesso para o Supabase!');
+        }
+      } catch (err) {
+        alert('Erro ao puxar dados do Supabase: ' + err.message);
+        updateCloudStatusPill('error');
+      }
+    }
+
+    async function manualSyncCloud(isExplicitUpload = false) {
+      const syncIcon = document.getElementById('sync-icon');
+      if (syncIcon) syncIcon.classList.add('animate-spin');
+
+      if (!supabaseClient) {
+        setTimeout(() => {
+          if (syncIcon) syncIcon.classList.remove('animate-spin');
+          openSupabaseModal();
+        }, 300);
+        return;
+      }
+
+      await syncPushToSupabase();
+      setTimeout(() => {
+        if (syncIcon) syncIcon.classList.remove('animate-spin');
+        if (isExplicitUpload) alert('Upload concluído com sucesso para o Supabase!');
+      }, 500);
+    }
+
+    function openSupabaseModal() {
+      updateSupabaseModalUI();
+      openModal('modal-supabase-config');
+    }
+
+    function updateSupabaseModalUI() {
+      const cfg = getSupabaseConfig();
+      const urlInp = document.getElementById('supabase-url-input');
+      const keyInp = document.getElementById('supabase-key-input');
+      if (urlInp) urlInp.value = cfg.url || '';
+      if (keyInp) keyInp.value = cfg.anonKey || '';
+
+      const dot = document.getElementById('supabase-status-dot');
+      const title = document.getElementById('supabase-status-title');
+      const desc = document.getElementById('supabase-status-desc');
+
+      if (supabaseClient) {
+        if (dot) dot.className = 'w-3 h-3 rounded-full bg-emerald-500';
+        if (title) title.textContent = 'Conectado ao Supabase';
+        if (desc) desc.textContent = 'Sincronização em tempo real ativa na nuvem.';
+      } else {
+        if (dot) dot.className = 'w-3 h-3 rounded-full bg-amber-500';
+        if (title) title.textContent = 'Modo Local Offline';
+        if (desc) desc.textContent = 'Dados salvos localmente neste navegador.';
+      }
+    }
+
+    function saveSupabaseCredentialsFromModal() {
+      const url = document.getElementById('supabase-url-input').value;
+      const key = document.getElementById('supabase-key-input').value;
+
+      if (!url || !key) {
+        alert('Por favor, preencha a URL e a Chave Anon.');
+        return;
+      }
+
+      saveSupabaseConfig(url, key);
+      updateSupabaseModalUI();
+      alert('Credenciais salvas! Testando conexão com o Supabase...');
+      syncPushToSupabase();
+    }
+
+    function disconnectSupabaseFromModal() {
+      if (confirm('Deseja realmente desconectar da nuvem e operar apenas offline?')) {
+        disconnectSupabase();
+      }
+    }
+
+    async function testSupabaseConnectionFromModal() {
+      const url = document.getElementById('supabase-url-input').value.trim();
+      const key = document.getElementById('supabase-key-input').value.trim();
+
+      if (!url || !key) {
+        alert('Preencha a URL e a Chave Anon para testar.');
+        return;
+      }
+
+      try {
+        const testClient = window.supabase.createClient(url, key);
+        const { error } = await testClient.from('crm_sync_state').select('id').limit(1);
+        if (error && error.code !== '42P01' && !error.message.includes('crm_sync_state')) {
+          alert('Erro ao conectar: ' + error.message);
+        } else {
+          alert('✅ Conexão bem-sucedida com o Supabase!');
+        }
+      } catch (err) {
+        alert('Falha na conexão: ' + err.message);
+      }
+    }
+
+    function copySupabaseSQLScript() {
+      navigator.clipboard.writeText(SUPABASE_SQL_SCHEMA).then(() => {
+        alert('✅ Script SQL copiado para a área de transferência! Cole no SQL Editor do Supabase.');
+      }).catch(() => {
+        prompt('Copie o código SQL abaixo:', SUPABASE_SQL_SCHEMA);
+      });
+    }
+
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      checkAuthOnLoad();
+      initSupabase();
+      setTab('painel');
+    });
+  </script>
+</body>
+</html>
