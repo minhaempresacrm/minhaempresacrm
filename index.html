@@ -692,6 +692,57 @@
     </div>
   </div>
 
+  
+  <!-- MODAL: NOVA PROPOSTA COMERCIAL -->
+  <div id="modal-prop" onclick="if(event.target===this)closeModal('modal-prop')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-[70] no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">Gerar Proposta Comercial</h3>
+        </div>
+        <button type="button" onclick="closeModal('modal-prop')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 dark:bg-slate-800 text-slate-600 hover:text-rose-600 text-xs font-bold flex items-center gap-1">
+          <i data-lucide="x" class="w-4 h-4"></i> Sair
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto flex-1 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Lead / Cliente *</label>
+          <select id="prop-lead-id" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold dark:text-white"></select>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Itens do Escopo Mensal</label>
+            <button type="button" onclick="addProposalItemRow('', 1, 1000)" class="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
+              + Adicionar Item
+            </button>
+          </div>
+          <div id="proposal-items-container" class="space-y-2"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Desconto (%)</label>
+            <input type="number" id="prop-discount" value="0" min="0" max="100" oninput="calcProposalTotal()" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white">
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-semibold text-slate-400 uppercase">Valor Final Mensal</span>
+            <div id="prop-total-display" class="text-xl font-black text-emerald-600 mt-1">R$ 0,00/mês</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex justify-end gap-2">
+        <button type="button" onclick="closeModal('modal-prop')" class="px-4 py-2 text-xs font-semibold text-slate-600">Cancelar</button>
+        <button type="button" onclick="saveProposal()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow">Salvar e Emitir Proposta</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: SCRIPTS DE WHATSAPP COM 1 CLIQUE (PLAYBOOK DE VENDAS) -->
   <div id="modal-scripts" onclick="if(event.target===this)closeModal('modal-scripts')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
@@ -723,7 +774,7 @@
   </div>
 
   <!-- MODAL: APP LAUNCHER (9 PONTOS) -->
-  <div id="modal-app-launcher" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+  <div id="modal-app-launcher" onclick="if(event.target===this)closeModal('modal-app-launcher')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl p-6 space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div class="flex items-center gap-2.5">
@@ -750,7 +801,7 @@
   </div>
 
   <!-- MODAL: Novo Lead / Editar Lead -->
-  <div id="modal-lead" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+  <div id="modal-lead" onclick="if(event.target===this)closeModal('modal-lead')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
       <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <h3 id="modal-lead-title" class="font-bold text-base text-slate-900 dark:text-white">Nova Oportunidade</h3>
@@ -845,7 +896,7 @@
   </div>
 
   <!-- MODAL: Ficha Detalhada (Salesforce Path, Colaborador & Scripts WA) -->
-  <div id="modal-details" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+  <div id="modal-details" onclick="if(event.target===this)closeModal('modal-details')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
       <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -857,6 +908,7 @@
               <h3 id="details-name" class="font-extrabold text-lg text-slate-900 dark:text-white">Nome do Cliente</h3>
               <span id="details-scoring-badge" class="px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">Score 85</span>
               <span id="details-source-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 border border-slate-200">Instagram</span>
+              <span id="details-service" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300 border border-blue-200">Serviço</span>
             </div>
             <span id="details-subtitle" class="text-xs text-slate-500 dark:text-slate-400">Empresa · Telefone</span>
           </div>
@@ -2747,9 +2799,12 @@
       }
     }
 
+    let topModalZ = 60;
     function openModal(id) {
       const m = document.getElementById(id);
       if (m) {
+        topModalZ += 2;
+        m.style.zIndex = String(topModalZ);
         m.classList.remove('hidden');
         m.classList.add('flex');
         if (window.lucide) lucide.createIcons();
@@ -2879,7 +2934,7 @@
       document.getElementById('details-subtitle').textContent = `${lead.company || 'Sem empresa'} · ${lead.phone}`;
       document.getElementById('details-mrr').textContent = formatBRL(lead.value) + '/mês';
       document.getElementById('details-weighted').textContent = formatBRL(weighted) + '/mês';
-      document.getElementById('details-service').textContent = serviceName(lead.service);
+      const dsEl = document.getElementById('details-service'); if (dsEl) dsEl.textContent = serviceName(lead.service);
       document.getElementById('details-temp').textContent = scoreInfo.label;
       document.getElementById('details-colab-name').textContent = getColabName(lead.assignedTo, db);
       const colabObj = (db.colaboradores || []).find(c => c.id === lead.assignedTo);
@@ -3055,6 +3110,29 @@
       document.getElementById('interaction-text').value = '';
       renderTimeline(currentDetailsLeadId);
       openDetailsModal(currentDetailsLeadId);
+    }
+
+        function openMarkLostModal() {
+      if (!currentDetailsLeadId) return;
+      const reason = prompt('Qual foi o motivo da perda desta oportunidade? (Ex: Preço, Fechou com concorrente, Sem retorno)', 'Sem orçamento no momento');
+      if (reason === null) return;
+      const db = loadDB();
+      const lead = db.leads.find(l => l.id === currentDetailsLeadId);
+      if (lead) {
+        lead.stage = 5;
+        lead.lostReason = reason.trim() || 'Não informado';
+        lead.lastContactAt = Date.now();
+        db.historico.unshift({
+          id: 'hist-' + Date.now(),
+          leadId: lead.id,
+          type: 'nota',
+          text: `❌ Marcado como Perdido. Motivo: ${lead.lostReason}`,
+          date: Date.now()
+        });
+        saveDB(db);
+        closeModal('modal-details');
+        refreshCurrentView();
+      }
     }
 
     function convertLeadToJourney() {
