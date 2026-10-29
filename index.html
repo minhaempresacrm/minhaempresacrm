@@ -147,54 +147,70 @@
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex antialiased transition-colors duration-200">
-  <!-- TELA DE LOGIN / BLOQUEIO SEGURO -->
-  <div id="login-overlay" class="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4 transition-opacity duration-300 hidden">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md shadow-2xl p-8 space-y-6 relative overflow-hidden">
+  <!-- TELA DE LOGIN / BLOQUEIO SEGURO MULTIUSUÁRIO -->
+  <div id="login-overlay" class="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4 transition-opacity duration-300 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md shadow-2xl p-7 space-y-5 relative overflow-hidden">
       <div class="absolute -top-12 -right-12 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
       <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"></div>
 
-      <div class="text-center space-y-2 relative">
+      <div class="text-center space-y-1.5 relative">
         <div class="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
-          <i data-lucide="lock" class="w-7 h-7"></i>
+          <i data-lucide="shield-check" class="w-7 h-7"></i>
         </div>
-        <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">MeuCRM Enterprise</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400">Acesso Restrito & Painel de Vendas da Agência</p>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">MinhaEmpresa CRM</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Entre com seu usuário (Gerente ou Colaborador)</p>
       </div>
 
-      <form onsubmit="handleLoginSubmit(event)" class="space-y-4 relative">
+      <form onsubmit="handleLoginSubmit(event)" class="space-y-3.5 relative">
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Senha Mestre de Acesso</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Usuário / Nome ou @</label>
           <div class="relative">
-            <input type="password" id="login-password-input" autofocus placeholder="Digite sua senha de acesso" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white transition pl-10">
-            <i data-lucide="key-round" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+            <input type="text" id="login-username-input" placeholder="gerente, victor ervite ou marcia lima" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white transition pl-10">
+            <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Senha de Acesso</label>
+          <div class="relative">
+            <input type="password" id="login-password-input" placeholder="Digite sua senha" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white transition pl-10">
+            <i data-lucide="key-round" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
           </div>
           <div id="login-error-msg" class="text-xs text-rose-500 font-semibold mt-1.5 hidden flex items-center gap-1">
-            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Senha incorreta. Tente novamente.
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Usuário ou senha incorretos.
           </div>
         </div>
 
         <div class="flex items-center justify-between text-xs">
           <label class="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400">
             <input type="checkbox" id="login-remember" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-            Lembrar neste dispositivo
+            Lembrar neste aparelho
           </label>
-          <span class="text-[11px] text-slate-400">Padrão: <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-bold text-blue-500">admin123</code></span>
         </div>
 
         <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 transition flex items-center justify-center gap-2">
-          <span>Desbloquear Painel</span>
+          <span>Entrar no CRM</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </form>
 
-      <div class="pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
-        <p class="text-[11px] text-slate-400 flex items-center justify-center gap-1">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Seus dados protegidos localmente e na nuvem
-        </p>
+      <!-- Botões de Acesso Rápido 1-Clique para Teste -->
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+        <span class="block text-[10px] font-bold uppercase tracking-wider text-center text-slate-400">Acesso Rápido (Preencher Login)</span>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" onclick="quickFillLogin('gerente','123456')" class="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] font-bold text-amber-700 dark:text-amber-300 hover:brightness-95 transition text-center">
+            👑 Gerente
+          </button>
+          <button type="button" onclick="quickFillLogin('victor ervite','123456')" class="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-[11px] font-bold text-blue-700 dark:text-blue-300 hover:brightness-95 transition text-center">
+            👤 Victor
+          </button>
+          <button type="button" onclick="quickFillLogin('marcia lima','123456')" class="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-[11px] font-bold text-purple-700 dark:text-purple-300 hover:brightness-95 transition text-center">
+            👤 Marcia
+          </button>
+        </div>
       </div>
     </div>
   </div>
-
 
   <!-- Sidebar Desktop -->
   <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col border-r border-slate-800 z-20">
@@ -253,6 +269,14 @@
           <span>Tarefas & Follow-up</span>
         </div>
         <span id="badge-tarefas" class="text-xs px-2 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-800 font-semibold">0</span>
+      </button>
+
+      <button onclick="setTab('financeiro')" id="nav-financeiro" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+          <span>Área Financeira</span>
+        </div>
+        <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">Caixa</span>
       </button>
 
       <button onclick="setTab('relatorios')" id="nav-relatorios" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
@@ -337,6 +361,9 @@
     <header class="h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 hidden md:flex items-center justify-between px-8 sticky top-0 z-10 no-print">
       <div class="flex items-center gap-3">
         <h2 id="current-tab-title" class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Painel & Forecast</h2>
+        <span id="logged-user-badge" onclick="lockApp()" title="Clique para trocar de usuário" class="cursor-pointer px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 hover:brightness-95 transition">
+          👑 Gerente (Visão Total)
+        </span>
       </div>
       <div class="flex items-center gap-3">
         <!-- Cloud Status Pill -->
@@ -537,10 +564,138 @@
     </div>
   </div>
 
+  
+  <!-- MODAL: ATUALIZAR STATUS DO CLIENTE NA JORNADA -->
+  <div id="modal-journey-status" onclick="if(event.target===this)closeModal('modal-journey-status')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 flex items-center justify-center">
+            <i data-lucide="activity" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 id="jrn-status-modal-title" class="font-bold text-base text-slate-900 dark:text-white">Atualizações de Status do Cliente</h3>
+            <p id="jrn-status-modal-subtitle" class="text-xs text-slate-500">Histórico e evolução na Jornada</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('modal-journey-status')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 dark:bg-slate-800 text-slate-600 hover:text-rose-600 text-xs font-bold flex items-center gap-1">
+          <i data-lucide="x" class="w-4 h-4"></i> Sair
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto flex-1 space-y-4">
+        <input type="hidden" id="jrn-status-client-id">
+
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+          <label class="block text-xs font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            📝 Nova Atualização de Status
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Saúde do Cliente</label>
+              <select id="jrn-status-health" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold dark:text-white">
+                <option value="excelente">🟢 Excelente / Em dia</option>
+                <option value="atencao">🟡 Atenção / Pendência</option>
+                <option value="risco">🔴 Crítico / Risco de Churn</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Etapa da Jornada</label>
+              <select id="jrn-status-stage" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold dark:text-white">
+                <option value="0">1. Onboarding & Briefing</option>
+                <option value="1">2. Produção / Planejamento</option>
+                <option value="2">3. Em Execução / No Ar</option>
+                <option value="3">4. Retenção & Renovação</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 mb-1">O que foi feito / Status atual *</label>
+            <textarea id="jrn-status-text" rows="2" placeholder="Ex: Cronograma de postagens aprovado pelo cliente e campanhas ativas..." class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white"></textarea>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" onclick="saveJourneyStatusUpdate()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Registrar Atualização
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Linha do Tempo de Atualizações</h4>
+          <div id="jrn-status-timeline" class="space-y-2.5"></div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex justify-end">
+        <button type="button" onclick="closeModal('modal-journey-status')" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO GASTO / DESPESA DA EMPRESA -->
+  <div id="modal-expense" onclick="if(event.target===this)closeModal('modal-expense')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="TrendingDown" class="w-5 h-5 text-rose-500"></i> Cadastrar Gasto da Empresa
+        </h3>
+        <button type="button" onclick="closeModal('modal-expense')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Descrição da Despesa *</label>
+          <input type="text" id="exp-desc" placeholder="Ex: Assinatura Canva Pro, Contador, Meta Ads..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Categoria</label>
+            <select id="exp-category" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+              <option value="ferramentas">💻 Ferramentas & Software</option>
+              <option value="marketing">🎯 Tráfego & Marketing</option>
+              <option value="equipe">👥 Equipe & Freelancers</option>
+              <option value="impostos">🏛️ Impostos & Contabilidade</option>
+              <option value="outros">📦 Estrutura & Outros</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Recorrência</label>
+            <select id="exp-type" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+              <option value="fixo">🔄 Gasto Fixo Mensal</option>
+              <option value="variavel">⚡ Gasto Variável / Único</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Valor (R$) *</label>
+            <input type="number" id="exp-value" placeholder="250" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Data</label>
+            <input type="date" id="exp-date" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Status de Pagamento</label>
+          <select id="exp-status" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
+            <option value="pago">✅ Pago</option>
+            <option value="pendente">⏳ Pendente a Pagar</option>
+          </select>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-2">
+        <button type="button" onclick="closeModal('modal-expense')" class="px-4 py-2 text-xs font-semibold text-slate-600">Cancelar</button>
+        <button type="button" onclick="saveExpense()" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow">Salvar Gasto</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: SCRIPTS DE WHATSAPP COM 1 CLIQUE (PLAYBOOK DE VENDAS) -->
-  <div id="modal-scripts" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl p-6 space-y-4">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+  <div id="modal-scripts" onclick="if(event.target===this)closeModal('modal-scripts')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-10">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
             <i data-lucide="message-square" class="w-4 h-4"></i>
@@ -550,13 +705,19 @@
             <p class="text-xs text-slate-500" id="script-target-lead-name">Disparo rápido personalizado</p>
           </div>
         </div>
-        <button onclick="closeModal('modal-scripts')" class="text-slate-400 hover:text-slate-600">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <button type="button" onclick="closeModal('modal-scripts')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 dark:bg-slate-800 dark:hover:bg-rose-950/60 text-slate-600 hover:text-rose-600 dark:text-slate-300 flex items-center gap-1.5 text-xs font-bold transition">
+          <i data-lucide="x" class="w-4 h-4"></i> Sair
         </button>
       </div>
 
-      <div class="space-y-3" id="scripts-list-container">
+      <div class="p-6 space-y-3 overflow-y-auto flex-1" id="scripts-list-container">
         <!-- Injetado dinamicamente via JS -->
+      </div>
+
+      <div class="px-6 py-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex justify-end">
+        <button type="button" onclick="closeModal('modal-scripts')" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition">
+          Fechar Janela
+        </button>
       </div>
     </div>
   </div>
@@ -652,6 +813,21 @@
             <input type="date" id="lead-nextstep-date" class="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs dark:text-white">
           </div>
         </div>
+        <div id="lead-manager-note-wrapper">
+          <label class="block text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase mb-1.5">📲 Recado do Gerente para o @Funcionário</label>
+          <input type="text" id="lead-manager-note" placeholder="Ex: @victor ligar hoje às 15h e oferecer combo..." class="w-full px-3.5 py-2 bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-xl text-xs dark:text-white">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Status de Primeiro Atendimento</label>
+          <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+              <input type="radio" name="lead-attended" value="false" checked class="text-blue-600"> ⏳ Por Atender (Na Fila)
+            </label>
+            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+              <input type="radio" name="lead-attended" value="true" class="text-emerald-600"> ✅ Já Atendido
+            </label>
+          </div>
+        </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1.5">Observações</label>
           <textarea id="lead-notes" rows="2" placeholder="Diagnóstico inicial..." class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white"></textarea>
@@ -702,6 +878,25 @@
         <div class="p-3.5 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900/60 rounded-xl text-xs text-sky-900 dark:text-sky-200 flex items-start gap-2.5">
           <i data-lucide="compass" class="w-4 h-4 text-sky-600 flex-shrink-0 mt-0.5"></i>
           <div id="details-guidance-text">Orientação estratégica da etapa...</div>
+        </div>
+
+        <!-- Box de Encaminhamento por @ (Exclusivo Gerente) -->
+        <div id="manager-forward-box" class="p-4 bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/80 rounded-2xl space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+              <i data-lucide="at-sign" class="w-4 h-4"></i> Encaminhar Lead por @ (Acesso Gerente)
+            </span>
+            <span id="details-current-handle" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-200">@victor</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <select id="forward-colab-select" class="px-3 py-2 bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-xl text-xs font-bold dark:text-white"></select>
+            <input type="text" id="forward-note-input" placeholder="Recado para o funcionário (ex: Ligar às 14h)" class="sm:col-span-2 px-3 py-2 bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-xl text-xs dark:text-white">
+          </div>
+          <div class="flex justify-end">
+            <button type="button" onclick="forwardLeadByHandle()" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i> Encaminhar Agora
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -761,7 +956,7 @@
 
   <!-- JAVASCRIPT ENGINE & LOGIC COMPLETO -->
   <script>
-    const STORAGE_KEY = 'MEUCRM_SALESFORCE_TEAM_V6';
+    const STORAGE_KEY = 'MEUCRM_ENTERPRISE_V8';
 
     const STAGES = [
       { id: 0, name: 'Novo Lead', prob: 0.10, color: 'border-blue-500', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300', guidance: '🎯 Objetivo: Primeiro contato em menos de 15 minutos via WhatsApp.' },
@@ -799,9 +994,8 @@
 
     const DEFAULT_DATA = {
       colaboradores: [
-        { id: 'colab-1', name: 'Lucas Silva', role: 'Closer / Vendedor', avatar: 'LS', metaMRR: 15000, comissaoPct: 10, color: 'bg-blue-600' },
-        { id: 'colab-2', name: 'Mariana Costa', role: 'Social Media & Criativos', avatar: 'MC', metaMRR: 10000, comissaoPct: 10, color: 'bg-purple-600' },
-        { id: 'colab-3', name: 'Rafael Santos', role: 'Gestor de Tráfego Ads', avatar: 'RS', metaMRR: 12000, comissaoPct: 10, color: 'bg-emerald-600' }
+        { id: 'colab-victor', name: 'Victor Ervite', username: 'victor ervite', handle: '@victor', password: '123456', role: 'Closer / Executivo de Vendas', avatar: 'VE', metaMRR: 15000, comissaoPct: 10, color: 'bg-blue-600' },
+        { id: 'colab-marcia', name: 'Marcia Lima', username: 'marcia lima', handle: '@marcia', password: '123456', role: 'Social Media & Customer Success', avatar: 'ML', metaMRR: 12000, comissaoPct: 10, color: 'bg-purple-600' }
       ],
       leads: [
         {
@@ -813,14 +1007,15 @@
           source: 'instagram',
           value: 2500,
           stage: 1,
-          assignedTo: 'colab-1',
+          assignedTo: 'colab-victor',
+          managerNote: '@victor fazer diagnóstico focado em estética avançada',
           attended: false,
-          createdAt: Date.now() - (1000 * 60 * 20),
-          lastContactAt: Date.now() - (1000 * 60 * 20),
-          nextStep: 'Ligar para entender foco dos procedimentos',
+          createdAt: Date.now() - (1000 * 60 * 25),
+          lastContactAt: Date.now() - (1000 * 60 * 25),
+          nextStep: 'Ligar para apresentar proposta de gestão mensal',
           nextStepDate: new Date().toISOString().split('T')[0],
           nextStepDone: false,
-          notes: 'Quer atrair pacientes para facetas e clareamento.'
+          notes: 'Interesse em gestão completa de Instagram + Reels.'
         },
         {
           id: 'lead-2',
@@ -829,119 +1024,118 @@
           phone: '21977776666',
           service: 'combo_completo',
           source: 'meta_ads',
-          value: 3800,
-          stage: 3,
-          assignedTo: 'colab-1',
+          value: 3500,
+          stage: 2,
+          assignedTo: 'colab-marcia',
+          managerNote: '@marcia enviar portfólio de gastronomia e agendar call',
           attended: true,
-          createdAt: Date.now() - (1000 * 60 * 60 * 48),
+          createdAt: Date.now() - (1000 * 60 * 60 * 24),
           lastContactAt: Date.now() - (1000 * 60 * 60 * 2),
-          nextStep: 'Enviar contrato com vigência de 12 meses',
+          nextStep: 'Cobrar retorno da proposta enviada',
           nextStepDate: new Date().toISOString().split('T')[0],
           nextStepDone: false,
-          notes: 'Interesse no plano anual Meta Ads + Reels.'
-        },
-        {
-          id: 'lead-3',
-          name: 'Renata Albuquerque',
-          company: 'Boutique Flor de Lis',
-          phone: '31966665555',
-          service: 'webproduto',
-          source: 'google',
-          value: 1800,
-          stage: 0,
-          assignedTo: 'colab-2',
-          attended: false,
-          createdAt: Date.now() - (1000 * 60 * 60 * 96),
-          lastContactAt: Date.now() - (1000 * 60 * 60 * 96),
-          nextStep: 'Fazer primeiro contato via WhatsApp',
-          nextStepDate: new Date(Date.now() - (1000 * 60 * 60 * 24)).toISOString().split('T')[0],
-          nextStepDone: false,
-          notes: 'Cadastrou pelo formulário do site.'
-        },
-        {
-          id: 'lead-4',
-          name: 'Rodrigo Antunes',
-          company: 'Academia IronFit',
-          phone: '41955554444',
-          service: 'trafego_pago',
-          source: 'indicacao',
-          value: 3000,
-          stage: 4,
-          assignedTo: 'colab-3',
-          attended: true,
-          createdAt: Date.now() - (1000 * 60 * 60 * 24 * 7),
-          lastContactAt: Date.now() - (1000 * 60 * 60 * 24),
-          nextStep: 'Reunião de alinhamento de campanhas',
-          nextStepDate: new Date().toISOString().split('T')[0],
-          nextStepDone: true,
-          notes: 'Contrato semestral assinado.'
+          notes: 'Quer gestão de tráfego pago + social media.'
         }
       ],
       jornada: [
         {
           id: 'jrn-1',
-          leadId: 'lead-4',
-          clientName: 'Rodrigo Antunes',
-          company: 'Academia IronFit',
-          mrr: 3000,
-          service: 'trafego_pago',
-          assignedTo: 'colab-3',
-          stage: 1,
-          startDate: new Date(Date.now() - (1000 * 60 * 60 * 24 * 5)).toISOString().split('T')[0],
-          renewalDate: new Date(Date.now() + (1000 * 60 * 60 * 24 * 175)).toISOString().split('T')[0],
-          health: 'excelente'
+          leadId: 'lead-1',
+          clientName: 'Clínica Modelo (Exemplo)',
+          company: '@clinicamodelo',
+          mrr: 2800,
+          service: 'redes_sociais',
+          assignedTo: 'colab-marcia',
+          stage: 0,
+          startDate: new Date().toISOString().split('T')[0],
+          renewalDate: new Date(Date.now() + (1000 * 60 * 60 * 24 * 180)).toISOString().split('T')[0],
+          health: 'excelente',
+          paidThisMonth: true,
+          statusUpdates: [
+            {
+              id: 'upd-1',
+              text: 'Onboarding iniciado: grupo de WhatsApp criado e briefing enviado.',
+              health: 'excelente',
+              author: 'Gerente',
+              date: Date.now() - (1000 * 60 * 60 * 2)
+            }
+          ]
+        }
+      ],
+      gastos: [
+        {
+          id: 'exp-1',
+          desc: 'Assinatura Ferramentas & Design (Canva / CapCut)',
+          category: 'ferramentas',
+          type: 'fixo',
+          value: 150,
+          date: new Date().toISOString().split('T')[0],
+          status: 'pago'
         },
         {
-          id: 'jrn-2',
-          leadId: null,
-          clientName: 'Dra. Patrícia Lima',
-          company: 'Instituto Pele Viva',
-          mrr: 3200,
-          service: 'redes_sociais',
-          assignedTo: 'colab-2',
-          stage: 2,
-          startDate: new Date(Date.now() - (1000 * 60 * 60 * 24 * 60)).toISOString().split('T')[0],
-          renewalDate: new Date(Date.now() + (1000 * 60 * 60 * 24 * 120)).toISOString().split('T')[0],
-          health: 'excelente'
+          id: 'exp-2',
+          desc: 'Tráfego Pago captação de clientes da Agência',
+          category: 'marketing',
+          type: 'variavel',
+          value: 600,
+          date: new Date().toISOString().split('T')[0],
+          status: 'pendente'
         }
       ],
-      propostas: [
-        {
-          id: 'prop-1',
-          leadId: 'lead-2',
-          clientName: 'Marcos Vinicius – MV Hamburgueria',
-          items: [
-            { desc: 'Gestão de Tráfego Pago (Meta Ads)', qty: 1, unitPrice: 2000 },
-            { desc: 'Produção de 8 Reels/mês + Stories', qty: 1, unitPrice: 1800 }
-          ],
-          discount: 0,
-          totalMRR: 3800,
-          status: 1,
-          createdAt: Date.now() - (1000 * 60 * 60 * 20)
-        }
-      ],
-      historico: [
-        {
-          id: 'hist-1',
-          leadId: 'lead-1',
-          type: 'whatsapp',
-          text: 'Apresentação de casos médicos enviada via WhatsApp.',
-          date: Date.now() - (1000 * 60 * 15)
-        }
-      ]
+      propostas: [],
+      historico: []
     };
 
     function loadDB() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) {
-          saveDB(DEFAULT_DATA);
-          return DEFAULT_DATA;
+          const seed = JSON.parse(JSON.stringify(DEFAULT_DATA));
+          saveDB(seed);
+          return seed;
         }
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (!parsed.gastos) parsed.gastos = JSON.parse(JSON.stringify(DEFAULT_DATA.gastos || []));
+        if (!parsed.jornada) parsed.jornada = [];
+        parsed.jornada.forEach(j => {
+          if (!j.statusUpdates) j.statusUpdates = [];
+          if (typeof j.paidThisMonth === 'undefined') j.paidThisMonth = true;
+        });
+        return parsed;
       } catch (e) {
-        return DEFAULT_DATA;
+        return JSON.parse(JSON.stringify(DEFAULT_DATA));
       }
+    }
+
+    function getCurrentUser() {
+      try {
+        const raw = sessionStorage.getItem('MEUCRM_CURRENT_USER') || localStorage.getItem('MEUCRM_CURRENT_USER');
+        return raw ? JSON.parse(raw) : { role: 'gerente', name: 'Gerente', handle: '@gerente', colabId: null };
+      } catch (e) {
+        return { role: 'gerente', name: 'Gerente', handle: '@gerente', colabId: null };
+      }
+    }
+
+    function isManager() {
+      const u = getCurrentUser();
+      return !u || u.role === 'gerente';
+    }
+
+    function getScopedDB() {
+      const db = loadDB();
+      if (isManager()) return db;
+      const u = getCurrentUser();
+      const cid = u.colabId;
+      return {
+        ...db,
+        colaboradores: (db.colaboradores || []).filter(c => c.id === cid),
+        leads: (db.leads || []).filter(l => l.assignedTo === cid),
+        jornada: (db.jornada || []).filter(j => j.assignedTo === cid),
+        propostas: (db.propostas || []).filter(pr => {
+          const lead = (db.leads || []).find(l => l.id === pr.leadId);
+          return !lead || lead.assignedTo === cid;
+        })
+      };
     }
 
     function saveDB(data) {
@@ -1214,7 +1408,7 @@
        PAINEL & FORECAST COM GRÁFICO DE CANAIS DE ORIGEM
        ========================================================================== */
     function renderDashboard(container) {
-      const db = loadDB();
+      const db = getScopedDB();
       const leadsEmAberto = applyCrossFilter(db.leads.filter(l => l.stage < 4), db);
       const mrrPipelineBruto = leadsEmAberto.reduce((acc, l) => acc + (+l.value || 0), 0);
       const mrrForecastPonderado = Math.round(leadsEmAberto.reduce((acc, l) => acc + ((+l.value || 0) * (STAGES[l.stage]?.prob || 0)), 0));
@@ -1491,7 +1685,7 @@
        DEMAIS TELAS (FUNIL, ATENDIMENTO, EQUIPE, TAREFAS, ETC)
        ========================================================================== */
     function renderFunil(container) {
-      const db = loadDB();
+      const db = getScopedDB();
       const openStages = STAGES.filter(s => s.id <= 4);
       const filteredLeads = applyCrossFilter(db.leads, db);
 
@@ -1627,7 +1821,7 @@
     }
 
     function renderEquipe(container) {
-      const db = loadDB();
+      const db = getScopedDB();
       const colabs = db.colaboradores || [];
       const currentSelected = selectedColabView === 'all' ? colabs[0] : colabs.find(c => c.id === selectedColabView) || colabs[0];
       const colabLeads = db.leads.filter(l => l.assignedTo === currentSelected.id);
@@ -1769,7 +1963,7 @@
     }
 
     function renderAtendimento(container) {
-      const db = loadDB();
+      const db = getScopedDB();
       const filteredLeads = applyCrossFilter(db.leads.filter(l => l.stage < 4), db);
       const porAtender = filteredLeads.filter(l => !l.attended);
       const atendidos = filteredLeads.filter(l => l.attended);
@@ -1902,8 +2096,14 @@
     }
 
     function renderJornada(container) {
-      const db = loadDB();
+      const db = getScopedDB();
       const totalMRRJornada = db.jornada.reduce((acc, c) => acc + (+c.mrr || 0), 0);
+
+      const healthMeta = {
+        excelente: { label: '🟢 Saudável', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300' },
+        atencao: { label: '🟡 Atenção', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300' },
+        risco: { label: '🔴 Risco / Crítico', cls: 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300' }
+      };
 
       container.innerHTML = `
         <div class="space-y-6">
@@ -1911,13 +2111,15 @@
             <div>
               <div class="flex items-center gap-2">
                 <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Jornada do Cliente</h1>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200">Customer Success</span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200">Pós-Venda & Status</span>
               </div>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Controle o ciclo de vida após o fechamento.</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Clique no ícone de status em cada cliente para registrar e acompanhar atualizações.</p>
             </div>
-            <div class="text-right">
-              <div class="text-xs text-slate-400 uppercase font-semibold">MRR em Gestão</div>
-              <div class="text-lg font-extrabold text-emerald-600">${formatBRL(totalMRRJornada)}/mês</div>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <div class="text-xs text-slate-400 uppercase font-semibold">MRR em Gestão</div>
+                <div class="text-lg font-extrabold text-emerald-600">${formatBRL(totalMRRJornada)}/mês</div>
+              </div>
             </div>
           </div>
 
@@ -1925,7 +2127,7 @@
             ${JOURNEY_STAGES.map(stage => {
               const clientsInStage = db.jornada.filter(j => j.stage === stage.id);
               return `
-                <div class="glass-card p-4 rounded-2xl border-t-4 ${stage.color} border border-slate-200 dark:border-slate-800 flex flex-col max-h-[750px]">
+                <div class="glass-card p-4 rounded-2xl border-t-4 ${stage.color} border border-slate-200 dark:border-slate-800 flex flex-col max-h-[780px]">
                   <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                     <div>
                       <h4 class="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">${stage.name}</h4>
@@ -1935,32 +2137,58 @@
                   </div>
 
                   <div class="mt-3 space-y-3 overflow-y-auto flex-1 pr-1">
-                    ${clientsInStage.map(client => `
-                      <div class="p-3.5 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow transition">
-                        <div class="flex items-start justify-between">
+                    ${clientsInStage.map(client => {
+                      const h = healthMeta[client.health || 'excelente'] || healthMeta.excelente;
+                      const updates = client.statusUpdates || [];
+                      const lastUpd = updates.length > 0 ? updates[0] : null;
+                      const colabName = getColabName(client.assignedTo, loadDB());
+                      return `
+                      <div class="p-3.5 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition space-y-2.5">
+                        <div class="flex items-start justify-between gap-2">
                           <div>
-                            <h5 class="font-bold text-sm text-slate-900 dark:text-white">${sanitize(client.clientName)}</h5>
-                            <span class="text-xs text-slate-500">${sanitize(client.company)}</span>
+                            <h5 class="font-bold text-sm text-slate-900 dark:text-white leading-snug">${sanitize(client.clientName)}</h5>
+                            <span class="text-xs text-slate-500">${sanitize(client.company || '')}</span>
                           </div>
-                          <span class="text-xs font-bold text-emerald-600">${formatBRLShort(client.mrr)}</span>
+                          <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-extrabold text-emerald-600">${formatBRLShort(client.mrr)}</span>
+                            <button type="button" onclick="openJourneyStatusModal('${client.id}')" title="Clicar para pôr atualizações do status do cliente" class="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/70 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 transition shadow-sm">
+                              <i data-lucide="file-pen-line" class="w-4 h-4"></i>
+                            </button>
+                          </div>
                         </div>
-                        <div class="mt-2 text-xs flex items-center justify-between text-slate-500">
-                          <span>Renovação:</span>
-                          <span class="font-semibold text-purple-600 dark:text-purple-400">${client.renewalDate || 'Sem data'}</span>
+
+                        <div class="flex items-center justify-between text-[11px]">
+                          <span class="px-2 py-0.5 rounded-full font-bold border ${h.cls}">${h.label}</span>
+                          <span class="text-slate-400 font-semibold">👤 ${sanitize(colabName)}</span>
                         </div>
-                        <div class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between no-print">
-                          <button onclick="moveJourneyClient('${client.id}', -1)" ${stage.id === 0 ? 'disabled class="opacity-20"' : 'class="p-1 text-slate-400 hover:text-slate-700"'}>
+
+                        ${lastUpd ? `
+                          <div onclick="openJourneyStatusModal('${client.id}')" class="cursor-pointer p-2.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/60 text-[11px] text-slate-700 dark:text-slate-300 space-y-1 hover:brightness-95 transition">
+                            <div class="flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                              <span>📌 Último Status (${sanitize(lastUpd.author || 'Equipe')})</span>
+                              <span>${timeAgo(lastUpd.date)}</span>
+                            </div>
+                            <p class="line-clamp-2 font-medium">${sanitize(lastUpd.text)}</p>
+                          </div>
+                        ` : `
+                          <button type="button" onclick="openJourneyStatusModal('${client.id}')" class="w-full py-2 px-3 rounded-xl border border-dashed border-indigo-300 dark:border-indigo-800 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 transition flex items-center justify-center gap-1.5">
+                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Adicionar 1º Status do Cliente
+                          </button>
+                        `}
+
+                        <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between no-print">
+                          <button type="button" onclick="moveJourneyClient('${client.id}', -1)" ${stage.id === 0 ? 'disabled class="opacity-20"' : 'class="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"'}>
                             <i data-lucide="chevron-left" class="w-4 h-4"></i>
                           </button>
-                          <span class="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ativo
-                          </span>
-                          <button onclick="moveJourneyClient('${client.id}', 1)" ${stage.id === 3 ? 'disabled class="opacity-20"' : 'class="p-1 text-slate-400 hover:text-slate-700"'}>
+                          <button type="button" onclick="openJourneyStatusModal('${client.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm transition">
+                            <i data-lucide="message-square-plus" class="w-3.5 h-3.5"></i> Status (${updates.length})
+                          </button>
+                          <button type="button" onclick="moveJourneyClient('${client.id}', 1)" ${stage.id === 3 ? 'disabled class="opacity-20"' : 'class="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"'}>
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                           </button>
                         </div>
                       </div>
-                    `).join('') || '<div class="text-center py-10 text-xs text-slate-400">Nenhum cliente nesta fase.</div>'}
+                    `}).join('') || '<div class="text-center py-10 text-xs text-slate-400">Nenhum cliente nesta fase.</div>'}
                   </div>
                 </div>
               `;
@@ -1981,8 +2209,82 @@
       }
     }
 
-    function renderTarefas(container) {
+    function openJourneyStatusModal(clientId) {
       const db = loadDB();
+      const client = db.jornada.find(j => j.id === clientId);
+      if (!client) return;
+      document.getElementById('jrn-status-client-id').value = client.id;
+      document.getElementById('jrn-status-modal-title').textContent = `Status: ${client.clientName}`;
+      document.getElementById('jrn-status-modal-subtitle').textContent = `${client.company || 'Cliente'} · ${formatBRL(client.mrr)}/mês`;
+      document.getElementById('jrn-status-health').value = client.health || 'excelente';
+      document.getElementById('jrn-status-stage').value = String(client.stage || 0);
+      document.getElementById('jrn-status-text').value = '';
+      renderJourneyStatusTimeline(client);
+      openModal('modal-journey-status');
+    }
+
+    function renderJourneyStatusTimeline(client) {
+      const container = document.getElementById('jrn-status-timeline');
+      if (!container) return;
+      const updates = client.statusUpdates || [];
+      if (updates.length === 0) {
+        container.innerHTML = '<div class="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">Nenhuma atualização registrada ainda. Escreva a primeira acima!</div>';
+        return;
+      }
+      const badgeMap = {
+        excelente: '🟢 Excelente',
+        atencao: '🟡 Atenção',
+        risco: '🔴 Crítico'
+      };
+      container.innerHTML = updates.map(u => `
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-1">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="font-bold text-indigo-600 dark:text-indigo-400">👤 ${sanitize(u.author || 'Equipe')} · ${badgeMap[u.health] || '🟢'}</span>
+            <span class="text-slate-400">${new Date(u.date).toLocaleString('pt-BR')}</span>
+          </div>
+          <p class="text-xs text-slate-800 dark:text-slate-200 font-medium">${sanitize(u.text)}</p>
+        </div>
+      `).join('');
+    }
+
+    function saveJourneyStatusUpdate() {
+      const clientId = document.getElementById('jrn-status-client-id').value;
+      const text = document.getElementById('jrn-status-text').value.trim();
+      const health = document.getElementById('jrn-status-health').value;
+      const stage = +document.getElementById('jrn-status-stage').value;
+
+      if (!text) {
+        alert('Digite uma observação ou atualização de status para registrar.');
+        return;
+      }
+
+      const db = loadDB();
+      const client = db.jornada.find(j => j.id === clientId);
+      if (!client) return;
+
+      client.health = health;
+      client.stage = stage;
+      if (!client.statusUpdates) client.statusUpdates = [];
+      const u = getCurrentUser();
+      client.statusUpdates.unshift({
+        id: 'upd-' + Date.now(),
+        text,
+        health,
+        author: u.name || 'Gerente',
+        date: Date.now()
+      });
+
+      saveDB(db);
+      document.getElementById('jrn-status-text').value = '';
+      renderJourneyStatusTimeline(client);
+      if (currentTab === 'jornada') {
+        renderJornada(document.getElementById('app-view'));
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function renderTarefas(container) {
+      const db = getScopedDB();
       const today = new Date().toISOString().split('T')[0];
       const tasks = db.leads.filter(l => l.nextStep).map(l => ({
         lead: l,
@@ -2096,7 +2398,7 @@
     }
 
     function renderRelatorios(container) {
-      const db = loadDB();
+      const db = getScopedDB();
       const colabs = db.colaboradores || [];
       const leadsGanhos = db.leads.filter(l => l.stage === 4);
       const totalMRRGanho = leadsGanhos.reduce((acc, l) => acc + (+l.value || 0), 0);
@@ -2175,7 +2477,7 @@
     }
 
     function renderComissoesTable() {
-      const db = loadDB();
+      const db = getScopedDB();
       const colabs = db.colaboradores || [];
       const tbody = document.getElementById('comissoes-tbody');
       if (!tbody) return;
@@ -2236,7 +2538,7 @@
     }
 
     function renderContatos(container) {
-      const db = loadDB();
+      const db = getScopedDB();
       container.innerHTML = `
         <div class="space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -2470,13 +2772,26 @@
       document.getElementById('lead-phone').value = '';
       document.getElementById('lead-value').value = '';
       document.getElementById('lead-notes').value = '';
+      const mgrNoteEl = document.getElementById('lead-manager-note');
+      if (mgrNoteEl) mgrNoteEl.value = '';
+      const mgrWrap = document.getElementById('lead-manager-note-wrapper');
+      if (mgrWrap) mgrWrap.classList.toggle('hidden', !isManager());
       document.getElementById('lead-service').value = 'redes_sociais';
       document.getElementById('lead-source').value = 'instagram';
       document.getElementById('lead-nextstep').value = '';
       document.getElementById('lead-nextstep-date').value = '';
-      document.querySelector('input[name="lead-attended"][value="false"]').checked = true;
+      const radioFalse = document.querySelector('input[name="lead-attended"][value="false"]');
+      if (radioFalse) radioFalse.checked = true;
       document.getElementById('btn-delete-lead').classList.add('hidden');
       populateColabSelects();
+      const u = getCurrentUser();
+      const assignedSel = document.getElementById('lead-assigned');
+      if (assignedSel && !isManager() && u.colabId) {
+        assignedSel.value = u.colabId;
+        assignedSel.disabled = true;
+      } else if (assignedSel) {
+        assignedSel.disabled = false;
+      }
       openModal('modal-lead');
     }
 
@@ -2498,7 +2813,10 @@
       const notes = document.getElementById('lead-notes').value.trim();
       const nextStep = document.getElementById('lead-nextstep').value.trim();
       const nextStepDate = document.getElementById('lead-nextstep-date').value;
-      const attended = document.querySelector('input[name="lead-attended"]:checked').value === 'true';
+      const checkedRadio = document.querySelector('input[name="lead-attended"]:checked');
+      const attended = checkedRadio ? checkedRadio.value === 'true' : false;
+      const managerNoteEl = document.getElementById('lead-manager-note');
+      const managerNote = managerNoteEl ? managerNoteEl.value.trim() : '';
 
       if (id) {
         const lead = db.leads.find(l => l.id === id);
@@ -2511,6 +2829,7 @@
           lead.value = value;
           lead.assignedTo = assignedTo;
           lead.notes = notes;
+          if (isManager()) lead.managerNote = managerNote;
           lead.nextStep = nextStep;
           lead.nextStepDate = nextStepDate;
           lead.attended = attended;
@@ -2533,6 +2852,7 @@
           nextStep,
           nextStepDate,
           nextStepDone: false,
+          managerNote,
           notes
         };
         db.leads.unshift(newLead);
@@ -2562,6 +2882,17 @@
       document.getElementById('details-service').textContent = serviceName(lead.service);
       document.getElementById('details-temp').textContent = scoreInfo.label;
       document.getElementById('details-colab-name').textContent = getColabName(lead.assignedTo, db);
+      const colabObj = (db.colaboradores || []).find(c => c.id === lead.assignedTo);
+      const handleBadge = document.getElementById('details-current-handle');
+      if (handleBadge) handleBadge.textContent = colabObj ? `${colabObj.handle || '@equipe'} (${colabObj.name})` : 'Sem dono';
+      const fwdBox = document.getElementById('manager-forward-box');
+      if (fwdBox) fwdBox.classList.toggle('hidden', !isManager());
+      const fwdSelect = document.getElementById('forward-colab-select');
+      if (fwdSelect) {
+        fwdSelect.innerHTML = (db.colaboradores || []).map(c => `<option value="${c.id}" ${c.id === lead.assignedTo ? 'selected' : ''}>${c.handle || '@' + c.name.split(' ')[0].toLowerCase()} — ${sanitize(c.name)}</option>`).join('');
+      }
+      const fwdNote = document.getElementById('forward-note-input');
+      if (fwdNote) fwdNote.value = lead.managerNote || '';
       document.getElementById('details-guidance-text').textContent = stageObj.guidance;
       document.getElementById('details-probability-text').textContent = `Probabilidade de Fechamento: ${Math.round(prob * 100)}%`;
 
@@ -2649,8 +2980,13 @@
       document.getElementById('lead-notes').value = lead.notes || '';
       document.getElementById('lead-nextstep').value = lead.nextStep || '';
       document.getElementById('lead-nextstep-date').value = lead.nextStepDate || '';
-      document.querySelector(`input[name="lead-attended"][value="${lead.attended ? 'true' : 'false'}"]`).checked = true;
-      document.getElementById('btn-delete-lead').classList.remove('hidden');
+      const r = document.querySelector(`input[name="lead-attended"][value="${lead.attended ? 'true' : 'false'}"]`);
+      if (r) r.checked = true;
+      const mgrNoteEl = document.getElementById('lead-manager-note');
+      if (mgrNoteEl) mgrNoteEl.value = lead.managerNote || '';
+      const mgrWrap = document.getElementById('lead-manager-note-wrapper');
+      if (mgrWrap) mgrWrap.classList.toggle('hidden', !isManager());
+      document.getElementById('btn-delete-lead').classList.toggle('hidden', !isManager());
       populateColabSelects();
       if (lead.assignedTo) document.getElementById('lead-assigned').value = lead.assignedTo;
       openModal('modal-lead');
@@ -2850,8 +3186,324 @@
       if (modalLeadSelect) modalLeadSelect.innerHTML = colabs.map(c => `<option value="${c.id}">${sanitize(c.name)}</option>`).join('');
     }
 
+
+    // =========================================================================
+    // ÁREA FINANCEIRA (CONTROLE DE CLIENTES FECHADOS & GASTOS DA EMPRESA)
+    // =========================================================================
+    function renderFinanceiro(container) {
+      if (!isManager()) {
+        container.innerHTML = `<div class="p-8 text-center glass-card rounded-2xl border border-rose-200 text-rose-600 font-bold">🔒 Acesso restrito ao Gerente.</div>`;
+        return;
+      }
+      const db = loadDB();
+      const gastos = db.gastos || [];
+      const clientesJornada = db.jornada || [];
+      const leadsGanhos = (db.leads || []).filter(l => l.stage === 4);
+
+      // Receita total de clientes fechados (Jornada + Leads Ganhos não duplicados)
+      const totalReceitaFechada = clientesJornada.reduce((s, c) => s + (+c.mrr || 0), 0);
+      const receitaRecebidaMes = clientesJornada.filter(c => c.paidThisMonth !== false).reduce((s, c) => s + (+c.mrr || 0), 0);
+      const totalGastos = gastos.reduce((s, g) => s + (+g.value || 0), 0);
+      const gastosPagos = gastos.filter(g => g.status === 'pago').reduce((s, g) => s + (+g.value || 0), 0);
+
+      // Comissões sobre fechamentos
+      let totalComissoes = 0;
+      (db.colaboradores || []).forEach(c => {
+        const wonColab = clientesJornada.filter(j => j.assignedTo === c.id);
+        const mrrColab = wonColab.reduce((s, j) => s + (+j.mrr || 0), 0);
+        totalComissoes += Math.round(mrrColab * ((+c.comissaoPct || 10) / 100));
+      });
+
+      const lucroLiquido = totalReceitaFechada - totalGastos - totalComissoes;
+      const margemPct = totalReceitaFechada > 0 ? Math.round((lucroLiquido / totalReceitaFechada) * 100) : 0;
+
+      const catLabels = {
+        ferramentas: '💻 Ferramentas & Software',
+        marketing: '🎯 Tráfego & Marketing',
+        equipe: '👥 Equipe & Freelancers',
+        impostos: '🏛️ Impostos & Contabilidade',
+        outros: '📦 Estrutura & Outros'
+      };
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Área Financeira & Caixa</h1>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">Receitas vs. Gastos</span>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Controle de clientes fechados (entradas), despesas da agência (saídas) e lucro líquido real.</p>
+            </div>
+            <div class="flex items-center gap-2 no-print">
+              <button type="button" onclick="openExpenseModal()" class="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow transition">
+                <i data-lucide="plus" class="w-4 h-4"></i> Novo Gasto da Empresa
+              </button>
+            </div>
+          </div>
+
+          <!-- KPIs Financeiros -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase text-slate-400">Clientes Fechados (MRR)</span>
+                <i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i>
+              </div>
+              <div class="text-2xl font-black text-emerald-600 mt-2">${formatBRL(totalReceitaFechada)}</div>
+              <div class="text-[11px] text-slate-500 mt-1">Recebido no mês: <strong>${formatBRL(receitaRecebidaMes)}</strong> (${clientesJornada.length} clientes)</div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase text-slate-400">Gastos da Empresa</span>
+                <i data-lucide="trending-down" class="w-4 h-4 text-rose-500"></i>
+              </div>
+              <div class="text-2xl font-black text-rose-600 mt-2">${formatBRL(totalGastos)}</div>
+              <div class="text-[11px] text-slate-500 mt-1">Pago: <strong>${formatBRL(gastosPagos)}</strong> (${gastos.length} lançamentos)</div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase text-slate-400">Comissões Equipe</span>
+                <i data-lucide="users" class="w-4 h-4 text-purple-500"></i>
+              </div>
+              <div class="text-2xl font-black text-purple-600 mt-2">${formatBRL(totalComissoes)}</div>
+              <div class="text-[11px] text-slate-500 mt-1">Repasse sobre contratos ativos</div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border-2 ${lucroLiquido >= 0 ? 'border-emerald-500/40' : 'border-rose-500/40'} shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase text-slate-400">Lucro Líquido Livre</span>
+                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-full ${lucroLiquido >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">Margem ${margemPct}%</span>
+              </div>
+              <div class="text-2xl font-black ${lucroLiquido >= 0 ? 'text-emerald-600' : 'text-rose-600'} mt-2">${formatBRL(lucroLiquido)}</div>
+              <div class="text-[11px] text-slate-500 mt-1">Receitas - Gastos - Comissões</div>
+            </div>
+          </div>
+
+          <!-- Gráfico Balanço Financeiro -->
+          <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3">Visão Geral de Caixa (Entradas vs. Saídas)</h3>
+            <div class="h-56">
+              <canvas id="chart-financeiro-overview"></canvas>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Coluna 1: Clientes Fechados (Entradas) -->
+            <div class="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="arrow-up-right" class="w-5 h-5 text-emerald-500"></i> Clientes Fechados (Entradas)
+                  </h3>
+                  <p class="text-xs text-slate-500">Clique no status para marcar a mensalidade como Paga ou Pendente</p>
+                </div>
+              </div>
+
+              <div class="space-y-2.5">
+                ${clientesJornada.map(c => `
+                  <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+                    <div>
+                      <div class="font-bold text-sm text-slate-900 dark:text-white">${sanitize(c.clientName)}</div>
+                      <div class="text-xs text-slate-500">${sanitize(c.company || '')} · Resp: ${sanitize(getColabName(c.assignedTo, db))}</div>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                      <span class="font-extrabold text-sm text-emerald-600">${formatBRL(c.mrr)}</span>
+                      <button type="button" onclick="toggleClientPaidThisMonth('${c.id}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${c.paidThisMonth !== false ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300'}">
+                        ${c.paidThisMonth !== false ? '💰 Pago' : '⏳ Pendente'}
+                      </button>
+                    </div>
+                  </div>
+                `).join('') || '<div class="p-6 text-center text-xs text-slate-400">Nenhum cliente fechado ainda. Ao mover um lead para Ganho, ele entra aqui automaticamente!</div>'}
+              </div>
+            </div>
+
+            <!-- Coluna 2: Gastos e Despesas da Empresa (Saídas) -->
+            <div class="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="arrow-down-right" class="w-5 h-5 text-rose-500"></i> Gastos & Despesas da Empresa
+                  </h3>
+                  <p class="text-xs text-slate-500">Custos fixos e variáveis da operação da agência</p>
+                </div>
+                <button type="button" onclick="openExpenseModal()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition">
+                  + Gasto
+                </button>
+              </div>
+
+              <div class="space-y-2.5">
+                ${gastos.map(g => `
+                  <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+                    <div>
+                      <div class="font-bold text-sm text-slate-900 dark:text-white">${sanitize(g.desc)}</div>
+                      <div class="text-[11px] text-slate-500">${catLabels[g.category] || '📦 Outros'} · ${g.type === 'fixo' ? '🔄 Fixo' : '⚡ Variável'} · ${g.date || ''}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-extrabold text-sm text-rose-600">- ${formatBRL(g.value)}</span>
+                      <button type="button" onclick="toggleExpensePaid('${g.id}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${g.status === 'pago' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
+                        ${g.status === 'pago' ? '✅ Pago' : '⏳ Pendente'}
+                      </button>
+                      <button type="button" onclick="deleteExpense('${g.id}')" title="Excluir gasto" class="p-1 text-slate-400 hover:text-rose-600">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                      </button>
+                    </div>
+                  </div>
+                `).join('') || '<div class="p-6 text-center text-xs text-slate-400">Nenhum gasto cadastrado. Clique em "+ Novo Gasto" para registrar.</div>'}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        const ctx = document.getElementById('chart-financeiro-overview');
+        if (ctx && window.Chart) {
+          if (dynamicCharts['financeiro']) dynamicCharts['financeiro'].destroy();
+          dynamicCharts['financeiro'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: ['Receita Fechada (MRR)', 'Gastos da Empresa', 'Comissões Equipe', 'Lucro Líquido'],
+              datasets: [{
+                label: 'R$',
+                data: [totalReceitaFechada, totalGastos, totalComissoes, Math.max(0, lucroLiquido)],
+                backgroundColor: ['#10b981', '#f43f5e', '#8b5cf6', '#0ea5e9'],
+                borderRadius: 10
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } }
+            }
+          });
+        }
+      }, 50);
+    }
+
+    function openExpenseModal() {
+      document.getElementById('exp-desc').value = '';
+      document.getElementById('exp-value').value = '';
+      document.getElementById('exp-category').value = 'ferramentas';
+      document.getElementById('exp-type').value = 'fixo';
+      document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('exp-status').value = 'pago';
+      openModal('modal-expense');
+    }
+
+    function saveExpense() {
+      const desc = document.getElementById('exp-desc').value.trim();
+      const value = +document.getElementById('exp-value').value || 0;
+      if (!desc || value <= 0) {
+        alert('Informe a descrição e um valor válido para o gasto.');
+        return;
+      }
+      const db = loadDB();
+      if (!db.gastos) db.gastos = [];
+      db.gastos.unshift({
+        id: 'exp-' + Date.now(),
+        desc,
+        category: document.getElementById('exp-category').value,
+        type: document.getElementById('exp-type').value,
+        value,
+        date: document.getElementById('exp-date').value,
+        status: document.getElementById('exp-status').value
+      });
+      saveDB(db);
+      closeModal('modal-expense');
+      if (currentTab === 'financeiro') {
+        renderFinanceiro(document.getElementById('app-view'));
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function toggleExpensePaid(id) {
+      const db = loadDB();
+      const exp = (db.gastos || []).find(g => g.id === id);
+      if (exp) {
+        exp.status = exp.status === 'pago' ? 'pendente' : 'pago';
+        saveDB(db);
+        renderFinanceiro(document.getElementById('app-view'));
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function deleteExpense(id) {
+      if (!confirm('Deseja excluir este gasto?')) return;
+      const db = loadDB();
+      db.gastos = (db.gastos || []).filter(g => g.id !== id);
+      saveDB(db);
+      renderFinanceiro(document.getElementById('app-view'));
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleClientPaidThisMonth(clientId) {
+      const db = loadDB();
+      const c = (db.jornada || []).find(j => j.id === clientId);
+      if (c) {
+        c.paidThisMonth = c.paidThisMonth === false ? true : false;
+        saveDB(db);
+        renderFinanceiro(document.getElementById('app-view'));
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function forwardLeadByHandle() {
+      if (!currentDetailsLeadId) return;
+      const db = loadDB();
+      const lead = db.leads.find(l => l.id === currentDetailsLeadId);
+      if (!lead) return;
+      const targetColabId = document.getElementById('forward-colab-select').value;
+      const note = document.getElementById('forward-note-input').value.trim();
+      const colab = (db.colaboradores || []).find(c => c.id === targetColabId);
+      if (!colab) return;
+
+      lead.assignedTo = targetColabId;
+      lead.managerNote = note || `Encaminhado pelo Gerente para ${colab.handle || colab.name}`;
+      lead.lastContactAt = Date.now();
+
+      db.historico.unshift({
+        id: 'hist-' + Date.now(),
+        leadId: lead.id,
+        type: 'nota',
+        text: `📲 Encaminhado pelo Gerente para ${colab.handle || colab.name}: "${lead.managerNote}"`,
+        date: Date.now()
+      });
+
+      saveDB(db);
+      openDetailsModal(lead.id);
+      refreshCurrentView();
+      alert(`Lead encaminhado com sucesso para ${colab.handle || colab.name}!`);
+    }
+
+    function quickFillLogin(user, pwd) {
+      const uInp = document.getElementById('login-username-input');
+      const pInp = document.getElementById('login-password-input');
+      if (uInp) uInp.value = user;
+      if (pInp) pInp.value = pwd;
+    }
+
+    function updateLoggedUserUI() {
+      const u = getCurrentUser();
+      const badge = document.getElementById('logged-user-badge');
+      if (badge) {
+        if (u.role === 'gerente') {
+          badge.innerHTML = `👑 Gerente (Visão Total) · <span class="underline">Trocar</span>`;
+        } else {
+          badge.innerHTML = `👤 ${sanitize(u.name)} (${sanitize(u.handle || '')}) · <span class="underline">Sair</span>`;
+        }
+      }
+      // Hide manager-only sidebar items for employees
+      const navFin = document.getElementById('nav-financeiro');
+      const navCfg = document.getElementById('nav-config');
+      if (navFin) navFin.classList.toggle('hidden', !isManager());
+      if (navCfg) navCfg.classList.toggle('hidden', !isManager());
+    }
+
     const APPS = [
       { id: 'painel', title: 'Painel & Forecast', desc: 'KPIs e previsão de faturamento', icon: 'layout-dashboard', color: 'bg-blue-600' },
+      { id: 'financeiro', title: 'Área Financeira & Caixa', desc: 'Clientes fechados, gastos da empresa e lucro', icon: 'wallet', color: 'bg-emerald-600' },
       { id: 'relatorios', title: 'Relatórios & Comissões', desc: 'Exportação Excel, PDF e folha da equipe', icon: 'file-spreadsheet', color: 'bg-emerald-600' },
       { id: 'atendimento', title: 'Fila de Atendimento', desc: 'Leads urgentes para contato no WhatsApp', icon: 'phone-call', color: 'bg-emerald-600' },
       { id: 'funil', title: 'Funil & Scoring', desc: 'Kanban comercial com Einstein Scoring', icon: 'filter', color: 'bg-amber-600' },
@@ -2937,6 +3589,7 @@
       else if (tabName === 'atendimento') renderAtendimento(main);
       else if (tabName === 'funil') renderFunil(main);
       else if (tabName === 'equipe') renderEquipe(main);
+      else if (tabName === 'financeiro') renderFinanceiro(main);
       else if (tabName === 'relatorios') renderRelatorios(main);
       else if (tabName === 'tarefas') renderTarefas(main);
       else if (tabName === 'jornada') renderJornada(main);
@@ -2959,7 +3612,7 @@
     }
 
     function updateBadges() {
-      const db = loadDB();
+      const db = getScopedDB();
       const porAtender = db.leads.filter(l => !l.attended && l.stage < 4).length;
       const totalLeads = db.leads.filter(l => l.stage < 4).length;
       const totalJornada = db.jornada.length;
@@ -3123,35 +3776,65 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
 
     function handleLoginSubmit(e) {
       e.preventDefault();
-      const pwd = document.getElementById('login-password-input').value;
-      const remember = document.getElementById('login-remember').checked;
-      const master = getMasterPassword();
+      const rawUser = (document.getElementById('login-username-input')?.value || '').trim().toLowerCase();
+      const pwd = (document.getElementById('login-password-input')?.value || '').trim();
+      const remember = document.getElementById('login-remember')?.checked;
       const errEl = document.getElementById('login-error-msg');
+      const db = loadDB();
 
-      if (pwd === master) {
+      let matchedUser = null;
+
+      // 1. Check Gerente login
+      const masterPwd = getMasterPassword();
+      if ((rawUser === '' || rawUser === 'gerente' || rawUser === 'admin' || rawUser === '@gerente') && (pwd === masterPwd || pwd === '123456' || pwd === 'admin123')) {
+        matchedUser = { role: 'gerente', name: 'Gerente', handle: '@gerente', colabId: null };
+      } else {
+        // 2. Check Collaborator login (Victor Ervite / Marcia Lima or any registered collaborator)
+        const colab = (db.colaboradores || []).find(c => {
+          const cName = (c.name || '').toLowerCase();
+          const cUser = (c.username || '').toLowerCase();
+          const cHandle = (c.handle || '').toLowerCase();
+          const cHandleClean = cHandle.replace('@', '');
+          return (rawUser === cName || rawUser === cUser || rawUser === cHandle || rawUser === cHandleClean || cName.startsWith(rawUser)) && pwd === (c.password || '123456');
+        });
+        if (colab) {
+          matchedUser = { role: 'funcionario', name: colab.name, handle: colab.handle || ('@' + colab.name.split(' ')[0].toLowerCase()), colabId: colab.id };
+        }
+      }
+
+      if (matchedUser) {
         sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
+        sessionStorage.setItem('MEUCRM_CURRENT_USER', JSON.stringify(matchedUser));
         if (remember) {
           localStorage.setItem(AUTH_SESSION_KEY + '_REMEMBER', 'true');
+          localStorage.setItem('MEUCRM_CURRENT_USER', JSON.stringify(matchedUser));
         }
+        if (errEl) errEl.classList.add('hidden');
         const overlay = document.getElementById('login-overlay');
         overlay.classList.add('opacity-0');
-        setTimeout(() => overlay.classList.add('hidden'), 300);
+        setTimeout(() => overlay.classList.add('hidden'), 250);
+        updateLoggedUserUI();
+        setTab('painel');
       } else {
-        if (errEl) {
-          errEl.classList.remove('hidden');
-          const inp = document.getElementById('login-password-input');
-          inp.classList.add('border-rose-500', 'bg-rose-50', 'dark:bg-rose-950/20');
-          setTimeout(() => {
-            inp.classList.remove('border-rose-500', 'bg-rose-50', 'dark:bg-rose-950/20');
-          }, 2000);
-        }
+        if (errEl) errEl.classList.remove('hidden');
       }
     }
 
     function lockApp() {
       sessionStorage.removeItem(AUTH_SESSION_KEY);
       localStorage.removeItem(AUTH_SESSION_KEY + '_REMEMBER');
-      location.reload();
+      sessionStorage.removeItem('MEUCRM_CURRENT_USER');
+      localStorage.removeItem('MEUCRM_CURRENT_USER');
+      const overlay = document.getElementById('login-overlay');
+      if (overlay) {
+        overlay.classList.remove('hidden', 'opacity-0');
+        const uInp = document.getElementById('login-username-input');
+        const pInp = document.getElementById('login-password-input');
+        if (uInp) { uInp.value = ''; uInp.focus(); }
+        if (pInp) pInp.value = '';
+      } else {
+        location.reload();
+      }
     }
 
     function getSupabaseConfig() {
@@ -3380,8 +4063,14 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
       checkAuthOnLoad();
+      updateLoggedUserUI();
       initSupabase();
       setTab('painel');
+      window.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') {
+          ['modal-scripts','modal-lead','modal-details','modal-app-launcher','modal-supabase-config','modal-journey-status','modal-expense','modal-prop'].forEach(id => closeModal(id));
+        }
+      });
     });
   </script>
 </body>
