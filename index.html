@@ -4411,10 +4411,16 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
     function getSupabaseConfig() {
       try {
         const raw = localStorage.getItem(SUPABASE_CFG_KEY);
-        return raw ? JSON.parse(raw) : { url: '', anonKey: '' };
-      } catch (e) {
-        return { url: '', anonKey: '' };
-      }
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.url && parsed.anonKey) return parsed;
+        }
+      } catch (e) {}
+      // Configuração padrão de nuvem do Supabase da minhaempresacrm
+      return {
+        url: 'https://zlnaushxdvuznlwmongk.supabase.co',
+        anonKey: 'sb_publishable_U_vT8rFuKXlwF4_yUlfaUQ_WcXYtcbx'
+      };
     }
 
     function saveSupabaseConfig(url, anonKey) {
@@ -4436,6 +4442,7 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
         try {
           supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
           updateCloudStatusPill('connected');
+          syncPullFromSupabaseSilent();
           return true;
         } catch (e) {
           console.warn('Erro ao instanciar Supabase:', e);
@@ -4447,6 +4454,25 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
         supabaseClient = null;
         updateCloudStatusPill('offline');
         return false;
+      }
+    }
+
+    async function syncPullFromSupabaseSilent() {
+      if (!supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient
+          .from('crm_sync_state')
+          .select('full_data, updated_at')
+          .eq('id', 'current_state')
+          .maybeSingle();
+
+        if (!error && data && data.full_data && data.full_data.leads) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data.full_data));
+          refreshCurrentView();
+          updateCloudStatusPill('connected');
+        }
+      } catch (e) {
+        console.warn('Silent pull warning:', e);
       }
     }
 
