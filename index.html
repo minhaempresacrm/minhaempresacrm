@@ -1006,6 +1006,38 @@
     </div>
   </div>
 
+  <!-- MODAL: DRILL-DOWN DE GRÁFICOS (PESSOAS CORRESPONDENTES AO CLIQUE) -->
+  <div id="modal-chart-drilldown" onclick="if(event.target===this)closeModal('modal-chart-drilldown')" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold shadow-inner">
+            <i data-lucide="users" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 id="drilldown-title" class="font-extrabold text-base">Pessoas Selecionadas</h3>
+              <span id="drilldown-total-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-white/20 text-white">0 pessoas</span>
+            </div>
+            <p id="drilldown-subtitle" class="text-xs text-blue-100 mt-0.5">Clique em uma pessoa para abrir a ficha completa ou chamar no WhatsApp</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('modal-chart-drilldown')" class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-extrabold flex items-center gap-1 transition shadow-sm">
+          ✕ Sair
+        </button>
+      </div>
+
+      <div id="drilldown-list" class="p-5 overflow-y-auto flex-1 space-y-3"></div>
+
+      <div class="px-6 py-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 flex items-center justify-between flex-shrink-0">
+        <span class="text-[11px] text-slate-400">💡 Dica: clique em "Abrir Ficha" para ver detalhes, editar ou encaminhar por @</span>
+        <button type="button" onclick="closeModal('modal-chart-drilldown')" class="px-5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition">
+          Fechar Janela
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- JAVASCRIPT ENGINE & LOGIC COMPLETO -->
   <script>
     const STORAGE_KEY = 'MEUCRM_ENTERPRISE_V8';
@@ -1461,11 +1493,16 @@
        ========================================================================== */
     function renderDashboard(container) {
       const db = getScopedDB();
-      const leadsEmAberto = applyCrossFilter(db.leads.filter(l => l.stage < 4), db);
+      const filteredAllLeads = applyCrossFilter(db.leads, db);
+      const leadsEmAberto = filteredAllLeads.filter(l => l.stage < 4);
+      const leadsGanhos = filteredAllLeads.filter(l => l.stage === 4);
       const mrrPipelineBruto = leadsEmAberto.reduce((acc, l) => acc + (+l.value || 0), 0);
       const mrrForecastPonderado = Math.round(leadsEmAberto.reduce((acc, l) => acc + ((+l.value || 0) * (STAGES[l.stage]?.prob || 0)), 0));
       const mrrAtivoJornada = db.jornada.reduce((acc, c) => acc + (+c.mrr || 0), 0);
       const leadsPorAtender = leadsEmAberto.filter(l => !l.attended).length;
+
+      const srcKeys = Object.keys(SOURCES);
+      const srcColors = ['#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
       container.innerHTML = `
         <div class="space-y-6">
@@ -1475,7 +1512,7 @@
                 <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Painel & Forecast Executivo</h1>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-300">Salesforce Intelligence</span>
               </div>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Previsão matemática de fechamento e canais de maior conversão.</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Clique em qualquer gráfico, ponto, fatia ou card para ver as pessoas correspondentes.</p>
             </div>
             <div class="flex items-center gap-2 no-print">
               <button onclick="setTab('relatorios')" class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition">
@@ -1490,53 +1527,98 @@
           ${renderCrossFilterBar()}
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="glass-card p-5 rounded-2xl border-2 border-blue-500/30 shadow-sm relative overflow-hidden bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/20">
-              <span class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Forecast Ponderado</span>
+            <div onclick="openChartDrilldown('forecast')" class="cursor-pointer glass-card p-5 rounded-2xl border-2 border-blue-500/30 hover:border-blue-500 shadow-sm relative overflow-hidden bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/20 transition group">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Forecast Ponderado</span>
+                <span class="text-[10px] font-bold text-blue-600 opacity-80 group-hover:underline">👆 Ver pessoas</span>
+              </div>
               <div class="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-2">${formatBRLShort(mrrForecastPonderado)}<span class="text-xs font-normal text-slate-500">/mês</span></div>
               <div class="text-xs text-slate-500 mt-1">Previsão calculada por probabilidade</div>
             </div>
 
-            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pipeline Total Filtrado</span>
+            <div onclick="openChartDrilldown('pipeline')" class="cursor-pointer glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 shadow-sm transition group">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pipeline Total Filtrado</span>
+                <span class="text-[10px] font-bold text-blue-600 opacity-80 group-hover:underline">👆 Ver pessoas</span>
+              </div>
               <div class="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-2">${formatBRLShort(mrrPipelineBruto)}<span class="text-xs font-normal text-slate-500">/mês</span></div>
               <div class="text-xs text-slate-500 mt-1">${leadsEmAberto.length} oportunidades correspondentes</div>
             </div>
 
-            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">MRR Ativo em Carteira</span>
+            <div onclick="openChartDrilldown('mrr_ativo')" class="cursor-pointer glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-500 shadow-sm transition group">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">MRR Ativo em Carteira</span>
+                <span class="text-[10px] font-bold text-emerald-600 opacity-80 group-hover:underline">👆 Ver clientes</span>
+              </div>
               <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">${formatBRLShort(mrrAtivoJornada)}</div>
               <div class="text-xs text-slate-500 mt-1">${db.jornada.length} contratos na Jornada</div>
             </div>
 
-            <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Fila Urgente</span>
+            <div onclick="openChartDrilldown('fila_urgente')" class="cursor-pointer glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-rose-500 shadow-sm transition group">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Fila Urgente</span>
+                <span class="text-[10px] font-bold text-rose-600 opacity-80 group-hover:underline">👆 Ver fila</span>
+              </div>
               <div class="text-2xl font-extrabold text-rose-600 mt-2">${leadsPorAtender}</div>
-              <div class="text-xs text-slate-500 mt-1"><a onclick="setTab('atendimento')" class="cursor-pointer hover:underline text-rose-600 font-semibold">Atender agora ➔</a></div>
+              <div class="text-xs text-slate-500 mt-1"><span class="text-rose-600 font-semibold">Clique para ver quem aguarda ➔</span></div>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="glass-card lg:col-span-2 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-              <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
                 <div>
                   <h3 class="font-bold text-base text-slate-900 dark:text-white">Evolução do Faturamento Recorrente (MRR)</h3>
-                  <p class="text-xs text-slate-500">Histórico de receita com projeção de Forecast</p>
+                  <p class="text-xs text-slate-500">👆 Clique em qualquer ponto do gráfico ou nos botões abaixo para ver as pessoas</p>
                 </div>
-                <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 border border-blue-200">Motion Dinâmico</span>
+                <span onclick="openChartDrilldown('mrr_point', 5)" class="cursor-pointer text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 text-blue-600 border border-blue-200 transition">👆 Ver Pessoas do Gráfico</span>
               </div>
-              <div class="h-64 w-full relative"><canvas id="chart-dashboard-mrr"></canvas></div>
+              <div class="h-60 w-full relative"><canvas id="chart-dashboard-mrr" class="cursor-pointer"></canvas></div>
+              <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-400 uppercase mr-1">Ver pessoas de:</span>
+                <button type="button" onclick="openChartDrilldown('mrr_ativo')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition flex items-center gap-1.5">
+                  🟢 Set / MRR Atual (${db.jornada.length + leadsGanhos.length})
+                </button>
+                <button type="button" onclick="openChartDrilldown('forecast')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 transition flex items-center gap-1.5">
+                  📈 Out / Forecast (${leadsEmAberto.length})
+                </button>
+                ${STAGES.filter(s => s.id <= 4).map(s => {
+                  const cnt = filteredAllLeads.filter(l => l.stage === s.id).length;
+                  return `<button type="button" onclick="openChartDrilldown('stage', ${s.id})" class="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">
+                    ${s.name} (${cnt})
+                  </button>`;
+                }).join('')}
+              </div>
             </div>
 
             <!-- Gráfico de Receita por Canal de Origem -->
             <div class="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-              <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center justify-between mb-3">
                 <div>
                   <h3 class="font-bold text-base text-slate-900 dark:text-white">Receita por Canal de Origem</h3>
-                  <p class="text-xs text-slate-500">Qual fonte traz mais receita</p>
+                  <p class="text-xs text-slate-500">👆 Clique na fatia ou no canal abaixo para ver as pessoas</p>
                 </div>
                 <i data-lucide="compass" class="w-5 h-5 text-indigo-500"></i>
               </div>
-              <div class="h-52 w-full relative flex items-center justify-center"><canvas id="chart-dashboard-sources"></canvas></div>
+              <div class="h-44 w-full relative flex items-center justify-center"><canvas id="chart-dashboard-sources" class="cursor-pointer"></canvas></div>
+              <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 gap-1.5">
+                ${srcKeys.map((k, idx) => {
+                  const peopleInSource = filteredAllLeads.filter(l => (l.source || 'instagram') === k);
+                  const valSource = peopleInSource.reduce((acc, l) => acc + (+l.value || 0), 0);
+                  return `
+                    <button type="button" onclick="openChartDrilldown('source', '${k}')" class="w-full px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-blue-50 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between text-xs transition group">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${srcColors[idx]}"></span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600">${SOURCES[k].label}</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">${peopleInSource.length} ${peopleInSource.length === 1 ? 'pessoa' : 'pessoas'}</span>
+                        <span class="font-extrabold text-slate-900 dark:text-white">${formatBRLShort(valSource)}</span>
+                      </div>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
             </div>
           </div>
         </div>
@@ -1549,27 +1631,61 @@
       const ctxMRR = document.getElementById('chart-dashboard-mrr');
       if (ctxMRR) {
         const mrrAtual = db.jornada.reduce((acc, c) => acc + (+c.mrr || 0), 0);
+        const mrrForecast = Math.round(leads.reduce((acc, l) => acc + ((+l.value || 0) * (STAGES[l.stage]?.prob || 0)), 0));
+        const mrrLabels = ['Mai', 'Jun', 'Jul', 'Ago', 'Set (Atual)', 'Out (Forecast)'];
         dynamicCharts['mrr'] = new Chart(ctxMRR, {
           type: 'line',
           data: {
-            labels: ['Mai', 'Jun', 'Jul', 'Ago', 'Set (Atual)', 'Out (Forecast)'],
+            labels: mrrLabels,
             datasets: [{
               label: 'MRR',
-              data: [Math.round(mrrAtual * 0.45), Math.round(mrrAtual * 0.60), Math.round(mrrAtual * 0.78), Math.round(mrrAtual * 0.90), mrrAtual, Math.round(mrrAtual * 1.30)],
+              data: [
+                Math.round(mrrAtual * 0.45),
+                Math.round(mrrAtual * 0.60),
+                Math.round(mrrAtual * 0.78),
+                Math.round(mrrAtual * 0.90),
+                mrrAtual,
+                mrrAtual + mrrForecast
+              ],
               borderColor: '#0176d3',
               borderWidth: 3,
               backgroundColor: 'rgba(1, 118, 211, 0.08)',
               fill: true,
               tension: 0.4,
-              pointBackgroundColor: '#0176d3',
-              pointRadius: 4
+              pointBackgroundColor: ['#0176d3', '#0176d3', '#0176d3', '#0176d3', '#10b981', '#7c3aed'],
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 7,
+              pointHoverRadius: 10,
+              pointHitRadius: 20
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            animation: { duration: 1000 },
-            plugins: { legend: { display: false } },
+            animation: { duration: 700 },
+            onHover: (event, elements) => {
+              if (event?.native?.target) {
+                event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+              }
+            },
+            onClick: (event, elements, chart) => {
+              if (elements && elements.length > 0) {
+                const idx = elements[0].index;
+                openChartDrilldown('mrr_point', idx);
+              } else {
+                // Fallback if user clicks anywhere on the canvas line area
+                openChartDrilldown('mrr_point', 5);
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  afterLabel: () => '👆 Clique para ver as pessoas deste ponto'
+                }
+              }
+            },
             scales: {
               y: { ticks: { callback: v => 'R$ ' + v, font: { size: 10 } }, grid: { color: 'rgba(156,163,175,0.1)' } },
               x: { grid: { display: false }, ticks: { font: { size: 10 } } }
@@ -1581,8 +1697,9 @@
       const ctxSources = document.getElementById('chart-dashboard-sources');
       if (ctxSources) {
         const srcKeys = Object.keys(SOURCES);
+        const filteredAll = applyCrossFilter(db.leads, db);
         const dataVals = srcKeys.map(k => {
-          return db.leads.filter(l => (l.source || 'instagram') === k).reduce((acc, l) => acc + (+l.value || 0), 0);
+          return filteredAll.filter(l => (l.source || 'instagram') === k).reduce((acc, l) => acc + (+l.value || 0), 0);
         });
 
         dynamicCharts['sources'] = new Chart(ctxSources, {
@@ -1593,14 +1710,40 @@
               data: dataVals.map(v => v || 1000),
               backgroundColor: ['#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
               borderWidth: 2,
+              hoverOffset: 8,
               borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff'
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            cutout: '70%'
+            onHover: (event, elements) => {
+              if (event?.native?.target) {
+                event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+              }
+            },
+            onClick: (event, elements) => {
+              if (elements && elements.length > 0) {
+                const idx = elements[0].index;
+                const key = srcKeys[idx];
+                if (key) openChartDrilldown('source', key);
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => {
+                    const key = srcKeys[ctx.dataIndex];
+                    const realVal = dataVals[ctx.dataIndex] || 0;
+                    const cnt = filteredAll.filter(l => (l.source || 'instagram') === key).length;
+                    return `${SOURCES[key].label}: R$ ${realVal.toLocaleString('pt-BR')} (${cnt} ${cnt === 1 ? 'pessoa' : 'pessoas'})`;
+                  },
+                  afterLabel: () => '👆 Clique para ver as pessoas deste canal'
+                }
+              }
+            },
+            cutout: '68%'
           }
         });
       }
@@ -1863,7 +2006,19 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          onHover: (event, elements) => {
+            if (event?.native?.target) event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+          },
+          onClick: (event, elements) => {
+            if (elements && elements.length > 0) {
+              const stageObj = stages[elements[0].index];
+              if (stageObj) openChartDrilldown('stage', stageObj.id);
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { afterLabel: () => '👆 Clique para ver as pessoas desta etapa' } }
+          },
           scales: {
             y: { ticks: { callback: v => 'R$ ' + v, font: { size: 9 } }, grid: { display: false } },
             x: { ticks: { font: { size: 9 } }, grid: { display: false } }
@@ -1997,7 +2152,7 @@
         data: {
           labels: colabs.map(c => c.name.split(' ')[0]),
           datasets: [{
-            data: colabs.map(c => db.leads.filter(l => l.assignedTo === c.id && l.stage === 4).reduce((acc, l) => acc + (+l.value || 0), 0)),
+            data: colabs.map(c => db.leads.filter(l => l.assignedTo === c.id).reduce((acc, l) => acc + (+l.value || 0), 0)),
             backgroundColor: ['#2563eb', '#9333ea', '#059669'],
             borderRadius: 6
           }]
@@ -2005,7 +2160,19 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          onHover: (event, elements) => {
+            if (event?.native?.target) event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+          },
+          onClick: (event, elements) => {
+            if (elements && elements.length > 0) {
+              const colab = colabs[elements[0].index];
+              if (colab) openChartDrilldown('colab', colab.id);
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { afterLabel: () => '👆 Clique para ver as pessoas deste colaborador' } }
+          },
           scales: {
             y: { ticks: { callback: v => 'R$ ' + v, font: { size: 9 } }, grid: { display: false } },
             x: { ticks: { font: { size: 9 } }, grid: { display: false } }
@@ -2141,7 +2308,19 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          onHover: (event, elements) => {
+            if (event?.native?.target) event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+          },
+          onClick: (event, elements) => {
+            if (elements && elements.length > 0) {
+              const idx = elements[0].index;
+              openChartDrilldown(idx === 0 ? 'fila_urgente' : 'atendidos');
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { afterLabel: () => '👆 Clique para ver as pessoas' } }
+          },
           cutout: '70%'
         }
       });
@@ -3453,7 +3632,22 @@
             options: {
               responsive: true,
               maintainAspectRatio: false,
-              plugins: { legend: { display: false } }
+              onHover: (event, elements) => {
+                if (event?.native?.target) event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+              },
+              onClick: (event, elements) => {
+                if (elements && elements.length > 0) {
+                  const idx = elements[0].index;
+                  if (idx === 0) openChartDrilldown('mrr_ativo');
+                  else if (idx === 1) openChartDrilldown('gastos');
+                  else if (idx === 2) openChartDrilldown('comissoes');
+                  else openChartDrilldown('mrr_ativo');
+                }
+              },
+              plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { afterLabel: () => '👆 Clique para ver o detalhamento' } }
+              }
             }
           });
         }
@@ -3687,6 +3881,305 @@
           delete dynamicCharts[k];
         }
       });
+    }
+
+    function openNewLeadWithSource(sourceKey) {
+      closeModal('modal-chart-drilldown');
+      openNewLeadModal();
+      const srcSel = document.getElementById('lead-source');
+      if (srcSel && sourceKey) srcSel.value = sourceKey;
+    }
+
+    function renderPersonCardInDrilldown(lead, db, showWeighted = false) {
+      const stageObj = STAGES[lead.stage] || STAGES[0];
+      const srcObj = SOURCES[lead.source || 'instagram'] || SOURCES['instagram'];
+      const colabName = getColabName(lead.assignedTo, db);
+      const weightedVal = Math.round((+lead.value || 0) * (stageObj.prob || 0));
+      const serviceLabels = {
+        redes_sociais: '📱 Redes Sociais',
+        trafego_pago: '🎯 Tráfego Pago',
+        webproduto: '💻 Webproduto',
+        combo_completo: '🚀 Combo Full'
+      };
+
+      return `
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-600 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span onclick="closeModal('modal-chart-drilldown'); openDetailsModal('${lead.id}')" class="font-extrabold text-sm text-slate-900 dark:text-white hover:text-blue-600 cursor-pointer transition">
+                👤 ${sanitize(lead.name)}
+              </span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${stageObj.badge}">${stageObj.name}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${srcObj.color}">${srcObj.label}</span>
+            </div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-2">
+              <span>🏢 <b>${sanitize(lead.company || 'Sem empresa')}</b></span>
+              <span>•</span>
+              <span>📞 ${sanitize(lead.phone || 'Sem telefone')}</span>
+              <span>•</span>
+              <span>${serviceLabels[lead.service] || '📱 Serviço'}</span>
+              <span>•</span>
+              <span class="text-purple-600 dark:text-purple-400 font-bold">Resp: ${sanitize(colabName)}</span>
+            </div>
+            ${lead.notes ? `<div class="text-[11px] text-slate-500 italic line-clamp-1">📝 "${sanitize(lead.notes)}"</div>` : ''}
+          </div>
+
+          <div class="flex sm:flex-col items-center sm:items-end justify-between gap-2 flex-shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200 dark:border-slate-700">
+            <div class="text-right">
+              <div class="text-sm font-black text-emerald-600">${formatBRL(lead.value)}/mês</div>
+              ${showWeighted ? `<div class="text-[10px] font-bold text-blue-600">Forecast (${Math.round((stageObj.prob || 0) * 100)}%): ${formatBRL(weightedVal)}</div>` : ''}
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="closeModal('modal-chart-drilldown'); openDetailsModal('${lead.id}')" class="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-bold shadow-sm transition flex items-center gap-1">
+                📋 Abrir Ficha
+              </button>
+              <button type="button" onclick="closeModal('modal-chart-drilldown'); openWhatsAppScriptsModal('${lead.id}')" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold shadow-sm transition flex items-center gap-1">
+                💬 WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderJourneyClientCardInDrilldown(client, db) {
+      const colabName = getColabName(client.assignedTo, db);
+      const jStage = JOURNEY_STAGES[client.stage || 0] || JOURNEY_STAGES[0];
+      const healthBadge = client.health === 'risco'
+        ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">🔴 Risco</span>'
+        : client.health === 'atencao'
+          ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">🟡 Atenção</span>'
+          : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">🟢 Saudável</span>';
+
+      return `
+        <div class="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-extrabold text-sm text-slate-900 dark:text-white">🏆 ${sanitize(client.clientName)}</span>
+              ${healthBadge}
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">${jStage.name}</span>
+            </div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-2">
+              <span>🏢 <b>${sanitize(client.company || 'Cliente Ativo')}</b></span>
+              <span>•</span>
+              <span class="text-purple-600 dark:text-purple-400 font-bold">Resp: ${sanitize(colabName)}</span>
+              <span>•</span>
+              <span>Mensalidade: <b>${client.paidThisMonth !== false ? '💰 Paga no mês' : '⏳ Pendente'}</b></span>
+            </div>
+          </div>
+
+          <div class="flex sm:flex-col items-center sm:items-end justify-between gap-2 flex-shrink-0">
+            <div class="text-sm font-black text-emerald-600">${formatBRL(client.mrr)}/mês</div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="closeModal('modal-chart-drilldown'); openJourneyStatusModal('${client.id}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-bold shadow-sm transition">
+                📌 Ver / Atualizar Status
+              </button>
+              ${client.leadId ? `
+                <button type="button" onclick="closeModal('modal-chart-drilldown'); openDetailsModal('${client.leadId}')" class="px-2.5 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-200 rounded-xl text-[11px] font-bold transition">
+                  📋 Ficha
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openChartDrilldown(type, param) {
+      const db = getScopedDB();
+      const filteredLeads = applyCrossFilter(db.leads, db);
+      const titleEl = document.getElementById('drilldown-title');
+      const subEl = document.getElementById('drilldown-subtitle');
+      const badgeEl = document.getElementById('drilldown-total-badge');
+      const listEl = document.getElementById('drilldown-list');
+      if (!titleEl || !listEl) return;
+
+      let title = 'Pessoas Correspondentes';
+      let subtitle = 'Clique em uma pessoa para abrir a ficha detalhada ou enviar mensagem';
+      let badgeText = '';
+      let htmlContent = '';
+
+      if (type === 'source') {
+        const srcKey = param || 'instagram';
+        const srcObj = SOURCES[srcKey] || { label: srcKey };
+        const people = filteredLeads.filter(l => (l.source || 'instagram') === srcKey);
+        const totalVal = people.reduce((acc, l) => acc + (+l.value || 0), 0);
+
+        title = `Canal: ${srcObj.label}`;
+        subtitle = `Pessoas que chegaram pelo canal ${srcObj.label}`;
+        badgeText = `${people.length} ${people.length === 1 ? 'pessoa' : 'pessoas'} · ${formatBRL(totalVal)}/mês`;
+
+        if (people.length > 0) {
+          htmlContent = people.map(l => renderPersonCardInDrilldown(l, db, false)).join('');
+        } else {
+          htmlContent = `
+            <div class="p-8 text-center space-y-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+              <div class="text-sm font-bold text-slate-600 dark:text-slate-300">Nenhuma pessoa cadastrada no canal ${srcObj.label} ainda.</div>
+              <p class="text-xs text-slate-400">Cadastre um novo lead com esta origem para acompanhar aqui.</p>
+              <button type="button" onclick="openNewLeadWithSource('${srcKey}')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow transition">
+                + Cadastrar Pessoa em ${srcObj.label}
+              </button>
+            </div>
+          `;
+        }
+      } else if (type === 'mrr_point') {
+        const idx = +param;
+        const monthNames = ['Maio', 'Junho', 'Julho', 'Agosto', 'Setembro (MRR Atual)', 'Outubro (Projeção Forecast)'];
+        const label = monthNames[idx] || 'MRR & Forecast';
+
+        if (idx === 5) {
+          // Outubro (Forecast): mostra clientes já ativos + pessoas em negociação que entram no Forecast
+          const openLeads = filteredLeads.filter(l => l.stage < 4);
+          const clients = db.jornada || [];
+          const mrrAtivo = clients.reduce((acc, c) => acc + (+c.mrr || 0), 0);
+          const forecastAdd = Math.round(openLeads.reduce((acc, l) => acc + ((+l.value || 0) * (STAGES[l.stage]?.prob || 0)), 0));
+
+          title = `📈 ${label}`;
+          subtitle = `Pessoas em negociação no Forecast (+${formatBRL(forecastAdd)}) + Clientes ativos (${formatBRL(mrrAtivo)})`;
+          badgeText = `${openLeads.length + clients.length} pessoas · Total Proj: ${formatBRL(mrrAtivo + forecastAdd)}`;
+
+          const openSection = openLeads.length > 0 ? `
+            <div class="space-y-2">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400 px-1">
+                🚀 Pessoas em Negociação que compõem o Forecast (${openLeads.length})
+              </div>
+              ${openLeads.map(l => renderPersonCardInDrilldown(l, db, true)).join('')}
+            </div>
+          ` : '';
+
+          const activeSection = clients.length > 0 ? `
+            <div class="space-y-2 mt-4">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-1">
+                🟢 Clientes Fechados na Base Recorrente (${clients.length})
+              </div>
+              ${clients.map(c => renderJourneyClientCardInDrilldown(c, db)).join('')}
+            </div>
+          ` : '';
+
+          htmlContent = (openSection + activeSection) || '<div class="p-6 text-center text-xs text-slate-400">Nenhuma pessoa cadastrada ainda.</div>';
+        } else {
+          // Pontos Mai..Set (Atual): mostra clientes ativos na Jornada e leads ganhos
+          const clients = db.jornada || [];
+          const wonLeads = filteredLeads.filter(l => l.stage === 4);
+          const openLeads = filteredLeads.filter(l => l.stage < 4);
+          const totalMRR = clients.reduce((acc, c) => acc + (+c.mrr || 0), 0);
+
+          title = `🟢 Clientes & Pessoas em ${label}`;
+          subtitle = `Clientes ativos no faturamento recorrente (MRR) e oportunidades da carteira`;
+          badgeText = `${clients.length} clientes ativos · ${formatBRL(totalMRR)}/mês`;
+
+          const activeHtml = clients.length > 0 ? `
+            <div class="space-y-2">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-1">
+                🏆 Clientes Fechados gerando MRR (${clients.length})
+              </div>
+              ${clients.map(c => renderJourneyClientCardInDrilldown(c, db)).join('')}
+            </div>
+          ` : '';
+
+          const wonHtml = wonLeads.length > 0 ? `
+            <div class="space-y-2 mt-4">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 px-1">
+                ✅ Leads Ganhos no Funil (${wonLeads.length})
+              </div>
+              ${wonLeads.map(l => renderPersonCardInDrilldown(l, db, false)).join('')}
+            </div>
+          ` : '';
+
+          const pipelineHtml = openLeads.length > 0 ? `
+            <div class="space-y-2 mt-4">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400 px-1">
+                📋 Pessoas em Negociação no Pipeline (${openLeads.length})
+              </div>
+              ${openLeads.map(l => renderPersonCardInDrilldown(l, db, true)).join('')}
+            </div>
+          ` : '';
+
+          htmlContent = (activeHtml + wonHtml + pipelineHtml) || '<div class="p-6 text-center text-xs text-slate-400">Nenhuma pessoa cadastrada neste período.</div>';
+        }
+      } else if (type === 'forecast' || type === 'pipeline') {
+        const openLeads = filteredLeads.filter(l => l.stage < 4);
+        const totalBruto = openLeads.reduce((acc, l) => acc + (+l.value || 0), 0);
+        const totalPond = Math.round(openLeads.reduce((acc, l) => acc + ((+l.value || 0) * (STAGES[l.stage]?.prob || 0)), 0));
+
+        title = type === 'forecast' ? '📈 Pessoas no Forecast Ponderado' : '📊 Pessoas no Pipeline em Aberto';
+        subtitle = `Bruto: ${formatBRL(totalBruto)}/mês · Ponderado por probabilidade: ${formatBRL(totalPond)}/mês`;
+        badgeText = `${openLeads.length} ${openLeads.length === 1 ? 'pessoa' : 'pessoas'}`;
+        htmlContent = openLeads.map(l => renderPersonCardInDrilldown(l, db, true)).join('') || '<div class="p-6 text-center text-xs text-slate-400">Nenhuma oportunidade em aberto com os filtros atuais.</div>';
+      } else if (type === 'mrr_ativo') {
+        const clients = db.jornada || [];
+        const totalMRR = clients.reduce((acc, c) => acc + (+c.mrr || 0), 0);
+        title = '🟢 Clientes Fechados (MRR Ativo)';
+        subtitle = 'Clientes com contrato ativo na Jornada do Cliente';
+        badgeText = `${clients.length} ${clients.length === 1 ? 'cliente' : 'clientes'} · ${formatBRL(totalMRR)}/mês`;
+        htmlContent = clients.map(c => renderJourneyClientCardInDrilldown(c, db)).join('') || '<div class="p-6 text-center text-xs text-slate-400">Nenhum cliente ativo na Jornada ainda.</div>';
+      } else if (type === 'fila_urgente' || type === 'atendidos') {
+        const isPending = type === 'fila_urgente';
+        const people = filteredLeads.filter(l => l.stage < 4 && (isPending ? !l.attended : l.attended));
+        const totalVal = people.reduce((acc, l) => acc + (+l.value || 0), 0);
+        title = isPending ? '🚨 Pessoas na Fila Urgente (Por Atender)' : '✅ Pessoas Já Atendidas';
+        subtitle = isPending ? 'Aguardando primeiro contato via WhatsApp / ligação' : 'Pessoas que já receberam atendimento inicial';
+        badgeText = `${people.length} ${people.length === 1 ? 'pessoa' : 'pessoas'} · ${formatBRL(totalVal)}/mês`;
+        htmlContent = people.map(l => renderPersonCardInDrilldown(l, db, false)).join('') || '<div class="p-6 text-center text-xs text-slate-400">Nenhuma pessoa nesta fila no momento.</div>';
+      } else if (type === 'stage') {
+        const stageId = +param;
+        const stageObj = STAGES[stageId] || STAGES[0];
+        const people = filteredLeads.filter(l => l.stage === stageId);
+        const totalVal = people.reduce((acc, l) => acc + (+l.value || 0), 0);
+        title = `Etapa: ${stageObj.name}`;
+        subtitle = `Probabilidade de fechamento desta etapa: ${Math.round((stageObj.prob || 0) * 100)}%`;
+        badgeText = `${people.length} ${people.length === 1 ? 'pessoa' : 'pessoas'} · ${formatBRL(totalVal)}/mês`;
+        htmlContent = people.map(l => renderPersonCardInDrilldown(l, db, true)).join('') || `<div class="p-6 text-center text-xs text-slate-400">Nenhuma pessoa na etapa "${stageObj.name}".</div>`;
+      } else if (type === 'colab') {
+        const colab = (db.colaboradores || []).find(c => c.id === param) || { name: 'Colaborador' };
+        const people = db.leads.filter(l => l.assignedTo === param);
+        const totalVal = people.reduce((acc, l) => acc + (+l.value || 0), 0);
+        title = `👤 Carteira de ${colab.name}`;
+        subtitle = `Todas as pessoas e oportunidades atribuídas a ${colab.handle || colab.name}`;
+        badgeText = `${people.length} ${people.length === 1 ? 'pessoa' : 'pessoas'} · ${formatBRL(totalVal)}/mês`;
+        htmlContent = people.map(l => renderPersonCardInDrilldown(l, db, true)).join('') || '<div class="p-6 text-center text-xs text-slate-400">Nenhuma pessoa atribuída a este colaborador.</div>';
+      } else if (type === 'gastos') {
+        const gastos = db.gastos || [];
+        const totalG = gastos.reduce((acc, g) => acc + (+g.value || 0), 0);
+        title = '💸 Gastos & Despesas da Empresa';
+        subtitle = 'Detalhamento das saídas cadastradas no financeiro';
+        badgeText = `${gastos.length} lançamentos · ${formatBRL(totalG)}`;
+        htmlContent = gastos.map(g => `
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <div>
+              <div class="font-bold text-sm text-slate-900 dark:text-white">${sanitize(g.desc)}</div>
+              <div class="text-xs text-slate-500">${g.type === 'fixo' ? '🔄 Fixo' : '⚡ Variável'} · Data: ${g.date || '-'} · Status: ${g.status === 'pago' ? '✅ Pago' : '⏳ Pendente'}</div>
+            </div>
+            <div class="font-extrabold text-sm text-rose-600">- ${formatBRL(g.value)}</div>
+          </div>
+        `).join('') || '<div class="p-6 text-center text-xs text-slate-400">Nenhum gasto cadastrado.</div>';
+      } else if (type === 'comissoes') {
+        const colabs = db.colaboradores || [];
+        title = '👥 Comissões da Equipe (Pessoas por Colaborador)';
+        subtitle = 'Clientes fechados e leads sob responsabilidade de cada membro';
+        badgeText = `${colabs.length} colaboradores`;
+        htmlContent = colabs.map(c => {
+          const cClients = (db.jornada || []).filter(j => j.assignedTo === c.id);
+          const cMRR = cClients.reduce((acc, j) => acc + (+j.mrr || 0), 0);
+          const comVal = Math.round(cMRR * ((c.comissaoPct || 10) / 100));
+          return `
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="font-extrabold text-sm text-slate-900 dark:text-white">👤 ${sanitize(c.name)} (${sanitize(c.handle || '')})</div>
+                <div class="text-xs font-extrabold text-purple-600">Comissão (${c.comissaoPct || 10}%): ${formatBRL(comVal)}</div>
+              </div>
+              <div class="text-xs text-slate-500">Clientes fechados na carteira (${cClients.length}): ${cClients.map(cl => sanitize(cl.clientName)).join(', ') || 'Nenhum'}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      titleEl.textContent = title;
+      if (subEl) subEl.textContent = subtitle;
+      if (badgeEl) badgeEl.textContent = badgeText;
+      listEl.innerHTML = htmlContent;
+      openModal('modal-chart-drilldown');
+      if (window.lucide) lucide.createIcons();
     }
 
     function updateBadges() {
