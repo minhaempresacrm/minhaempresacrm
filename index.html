@@ -317,7 +317,7 @@
     <div class="p-3 border-t border-slate-800">
       <div class="bg-slate-800/70 rounded-xl p-3 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs">SF</div>
+          <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs">MC</div>
           <div class="truncate">
             <div class="text-xs font-semibold text-white truncate">Agência Digital</div>
             <div class="text-[11px] text-slate-400 truncate">Vendas & Scripts WA</div>
@@ -1487,17 +1487,12 @@
       const mrrAtivoJornada = db.jornada.reduce((acc, c) => acc + (+c.mrr || 0), 0);
       const leadsPorAtender = leadsEmAberto.filter(l => !l.attended).length;
 
-      const srcKeys = Object.keys(SOURCES);
-      const srcColors = ['#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
-
       container.innerHTML = `
         <div class="space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <div class="flex items-center gap-2">
-                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Painel & Forecast Executivo</h1>
-                </div>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Clique em qualquer gráfico, ponto, fatia ou card para ver as pessoas correspondentes.</p>
+              <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Painel & Forecast Executivo</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Previsão matemática de fechamento e canais de maior conversão.</p>
             </div>
             <div class="flex items-center gap-2 no-print">
               <button onclick="setTab('relatorios')" class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition">
@@ -1512,97 +1507,47 @@
           ${renderCrossFilterBar()}
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div onclick="openChartDrilldown('forecast')" class="cursor-pointer glass-card p-5 rounded-2xl border-2 border-blue-500/30 hover:border-blue-500 shadow-sm relative overflow-hidden bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/20 transition group">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Forecast Ponderado</span>
-                <span class="text-[10px] font-bold text-blue-600 opacity-80 group-hover:underline">👆 Ver pessoas</span>
-              </div>
+            <div onclick="openChartDrilldown('forecast')" class="cursor-pointer glass-card p-5 rounded-2xl border-2 border-blue-500/30 hover:border-blue-500 shadow-sm relative overflow-hidden bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/20 transition">
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Forecast Ponderado</span>
               <div class="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-2">${formatBRLShort(mrrForecastPonderado)}<span class="text-xs font-normal text-slate-500">/mês</span></div>
               <div class="text-xs text-slate-500 mt-1">Previsão calculada por probabilidade</div>
             </div>
 
-            <div onclick="openChartDrilldown('pipeline')" class="cursor-pointer glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 shadow-sm transition group">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pipeline Total Filtrado</span>
-                <span class="text-[10px] font-bold text-blue-600 opacity-80 group-hover:underline">👆 Ver pessoas</span>
-              </div>
+            <div onclick="openChartDrilldown('pipeline')" class="cursor-pointer glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 shadow-sm transition">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pipeline Total Filtrado</span>
               <div class="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-2">${formatBRLShort(mrrPipelineBruto)}<span class="text-xs font-normal text-slate-500">/mês</span></div>
               <div class="text-xs text-slate-500 mt-1">${leadsEmAberto.length} oportunidades correspondentes</div>
             </div>
 
-            <div onclick="openChartDrilldown('mrr_ativo')" class="cursor-pointer glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-500 shadow-sm transition group">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">MRR Ativo em Carteira</span>
-                <span class="text-[10px] font-bold text-emerald-600 opacity-80 group-hover:underline">👆 Ver clientes</span>
-              </div>
+            <div onclick="openChartDrilldown('mrr_ativo')" class="cursor-pointer glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-500 shadow-sm transition">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">MRR Ativo em Carteira</span>
               <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">${formatBRLShort(mrrAtivoJornada)}</div>
               <div class="text-xs text-slate-500 mt-1">${db.jornada.length} contratos na Jornada</div>
             </div>
 
-            <div onclick="openChartDrilldown('fila_urgente')" class="cursor-pointer glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-rose-500 shadow-sm transition group">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Fila Urgente</span>
-                <span class="text-[10px] font-bold text-rose-600 opacity-80 group-hover:underline">👆 Ver fila</span>
-              </div>
+            <div onclick="openChartDrilldown('fila_urgente')" class="cursor-pointer glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-rose-500 shadow-sm transition">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Fila Urgente</span>
               <div class="text-2xl font-extrabold text-rose-600 mt-2">${leadsPorAtender}</div>
-              <div class="text-xs text-slate-500 mt-1"><span class="text-rose-600 font-semibold">Clique para ver quem aguarda ➔</span></div>
+              <div class="text-xs text-slate-500 mt-1"><span class="text-rose-600 font-semibold">Atender agora ➔</span></div>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="glass-card lg:col-span-2 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-              <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-                <div>
-                  <h3 class="font-bold text-base text-slate-900 dark:text-white">Evolução do Faturamento Recorrente (MRR)</h3>
-                  <p class="text-xs text-slate-500">👆 Clique em qualquer ponto do gráfico ou nos botões abaixo para ver as pessoas</p>
-                </div>
-                </div>
-              <div class="h-60 w-full relative"><canvas id="chart-dashboard-mrr" class="cursor-pointer"></canvas></div>
-              <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2">
-                <span class="text-[11px] font-bold text-slate-400 uppercase mr-1">Ver pessoas de:</span>
-                <button type="button" onclick="openChartDrilldown('mrr_ativo')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition flex items-center gap-1.5">
-                  🟢 Set / MRR Atual (${db.jornada.length + leadsGanhos.length})
-                </button>
-                <button type="button" onclick="openChartDrilldown('forecast')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 transition flex items-center gap-1.5">
-                  📈 Out / Forecast (${leadsEmAberto.length})
-                </button>
-                ${STAGES.filter(s => s.id <= 4).map(s => {
-                  const cnt = filteredAllLeads.filter(l => l.stage === s.id).length;
-                  return `<button type="button" onclick="openChartDrilldown('stage', ${s.id})" class="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">
-                    ${s.name} (${cnt})
-                  </button>`;
-                }).join('')}
+              <div class="mb-4">
+                <h3 class="font-bold text-base text-slate-900 dark:text-white">Evolução do Faturamento Recorrente (MRR)</h3>
+                <p class="text-xs text-slate-500">Histórico de receita com projeção de Forecast</p>
               </div>
+              <div class="h-64 w-full relative"><canvas id="chart-dashboard-mrr" class="cursor-pointer"></canvas></div>
             </div>
 
             <!-- Gráfico de Receita por Canal de Origem -->
             <div class="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-              <div class="flex items-center justify-between mb-3">
-                <div>
-                  <h3 class="font-bold text-base text-slate-900 dark:text-white">Receita por Canal de Origem</h3>
-                  <p class="text-xs text-slate-500">👆 Clique na fatia ou no canal abaixo para ver as pessoas</p>
-                </div>
-                <i data-lucide="compass" class="w-5 h-5 text-indigo-500"></i>
+              <div class="mb-4">
+                <h3 class="font-bold text-base text-slate-900 dark:text-white">Receita por Canal de Origem</h3>
+                <p class="text-xs text-slate-500">Qual fonte traz mais receita</p>
               </div>
-              <div class="h-44 w-full relative flex items-center justify-center"><canvas id="chart-dashboard-sources" class="cursor-pointer"></canvas></div>
-              <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 gap-1.5">
-                ${srcKeys.map((k, idx) => {
-                  const peopleInSource = filteredAllLeads.filter(l => (l.source || 'instagram') === k);
-                  const valSource = peopleInSource.reduce((acc, l) => acc + (+l.value || 0), 0);
-                  return `
-                    <button type="button" onclick="openChartDrilldown('source', '${k}')" class="w-full px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-blue-50 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between text-xs transition group">
-                      <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${srcColors[idx]}"></span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600">${SOURCES[k].label}</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">${peopleInSource.length} ${peopleInSource.length === 1 ? 'pessoa' : 'pessoas'}</span>
-                        <span class="font-extrabold text-slate-900 dark:text-white">${formatBRLShort(valSource)}</span>
-                      </div>
-                    </button>
-                  `;
-                }).join('')}
-              </div>
+              <div class="h-64 w-full relative flex items-center justify-center"><canvas id="chart-dashboard-sources" class="cursor-pointer"></canvas></div>
             </div>
           </div>
         </div>
