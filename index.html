@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>MeuCRM - Edição Completa Agência & Salesforce Enterprise</title>
+  <title>MeuCRM - Gestão Comercial e Financeira</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -221,14 +221,9 @@
         </button>
         <div>
           <span class="font-bold text-white tracking-tight text-base leading-none">MeuCRM</span>
-          <span class="block text-[10px] uppercase font-bold tracking-wider text-sky-400 mt-0.5">Salesforce Cloud</span>
-        </div>
+          </div>
       </div>
-      <button onclick="toggleDarkMode()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
-        <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
-        <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
-      </button>
-    </div>
+      </div>
 
     <!-- Navegação Menu -->
     <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -349,11 +344,7 @@
         <button onclick="openNewLeadModal()" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold flex items-center gap-1">
           <i data-lucide="plus" class="w-3.5 h-3.5"></i> Lead
         </button>
-        <button onclick="toggleDarkMode()" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
-          <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
-          <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
-        </button>
-      </div>
+        </div>
     </header>
 
     
@@ -389,12 +380,7 @@
           <i data-lucide="lock" class="w-4 h-4"></i>
         </button>
 
-        <!-- Alternar Tema -->
-        <button onclick="toggleDarkMode()" title="Alternar Modo Escuro" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition border border-slate-200 dark:border-slate-700">
-          <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
-          <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
-        </button>
-      </div>
+        </div>
     </header>
 
     <main id="app-view" class="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto pb-28 md:pb-10"></main>
@@ -921,7 +907,7 @@
       <div class="p-6 overflow-y-auto space-y-5">
         <div>
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Salesforce Path</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Etapas da Oportunidade</span>
             <span id="details-probability-text" class="text-xs font-extrabold text-blue-600">Probabilidade: 60%</span>
           </div>
           <div class="sf-path" id="salesforce-path-container"></div>
@@ -1510,8 +1496,7 @@
             <div>
               <div class="flex items-center gap-2">
                 <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Painel & Forecast Executivo</h1>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-300">Salesforce Intelligence</span>
-              </div>
+                </div>
               <p class="text-sm text-slate-500 dark:text-slate-400">Clique em qualquer gráfico, ponto, fatia ou card para ver as pessoas correspondentes.</p>
             </div>
             <div class="flex items-center gap-2 no-print">
@@ -1571,8 +1556,7 @@
                   <h3 class="font-bold text-base text-slate-900 dark:text-white">Evolução do Faturamento Recorrente (MRR)</h3>
                   <p class="text-xs text-slate-500">👆 Clique em qualquer ponto do gráfico ou nos botões abaixo para ver as pessoas</p>
                 </div>
-                <span onclick="openChartDrilldown('mrr_point', 5)" class="cursor-pointer text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 text-blue-600 border border-blue-200 transition">👆 Ver Pessoas do Gráfico</span>
-              </div>
+                </div>
               <div class="h-60 w-full relative"><canvas id="chart-dashboard-mrr" class="cursor-pointer"></canvas></div>
               <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2">
                 <span class="text-[11px] font-bold text-slate-400 uppercase mr-1">Ver pessoas de:</span>
