@@ -163,10 +163,10 @@
 
       <form onsubmit="handleLoginSubmit(event)" class="space-y-3.5 relative">
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Usuário / Nome ou @</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Seu @Usuário</label>
           <div class="relative">
-            <input type="text" id="login-username-input" placeholder="gerente, victor ervite ou marcia lima" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white transition pl-10">
-            <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+            <input type="text" id="login-username-input" placeholder="@gerente, @victor ou @marcia" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white transition pl-10">
+            <i data-lucide="at-sign" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
           </div>
         </div>
 
@@ -177,7 +177,7 @@
             <i data-lucide="key-round" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
           </div>
           <div id="login-error-msg" class="text-xs text-rose-500 font-semibold mt-1.5 hidden flex items-center gap-1">
-            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Usuário ou senha incorretos.
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> <span id="login-error-text">Usuário ou senha incorretos.</span>
           </div>
         </div>
 
@@ -186,26 +186,27 @@
             <input type="checkbox" id="login-remember" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
             Lembrar neste aparelho
           </label>
+          <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">🔒 Cofre Bcrypt Ativo</span>
         </div>
 
-        <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 transition flex items-center justify-center gap-2">
+        <button type="submit" id="login-submit-btn" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 transition flex items-center justify-center gap-2">
           <span>Entrar no CRM</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </form>
 
-      <!-- Botões de Acesso Rápido 1-Clique para Teste -->
+      <!-- Botões de Acesso Rápido por @ -->
       <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-        <span class="block text-[10px] font-bold uppercase tracking-wider text-center text-slate-400">Acesso Rápido (Preencher Login)</span>
+        <span class="block text-[10px] font-bold uppercase tracking-wider text-center text-slate-400">Acesso Rápido por @</span>
         <div class="grid grid-cols-3 gap-2">
-          <button type="button" onclick="quickFillLogin('gerente','123456')" class="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] font-bold text-amber-700 dark:text-amber-300 hover:brightness-95 transition text-center">
-            👑 Gerente
+          <button type="button" onclick="quickFillLogin('@gerente','123456')" class="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] font-bold text-amber-700 dark:text-amber-300 hover:brightness-95 transition text-center">
+            👑 @gerente
           </button>
-          <button type="button" onclick="quickFillLogin('victor ervite','123456')" class="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-[11px] font-bold text-blue-700 dark:text-blue-300 hover:brightness-95 transition text-center">
-            👤 Victor
+          <button type="button" onclick="quickFillLogin('@victor','123456')" class="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-[11px] font-bold text-blue-700 dark:text-blue-300 hover:brightness-95 transition text-center">
+            👤 @victor
           </button>
-          <button type="button" onclick="quickFillLogin('marcia lima','123456')" class="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-[11px] font-bold text-purple-700 dark:text-purple-300 hover:brightness-95 transition text-center">
-            👤 Marcia
+          <button type="button" onclick="quickFillLogin('@marcia','123456')" class="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-[11px] font-bold text-purple-700 dark:text-purple-300 hover:brightness-95 transition text-center">
+            👤 @marcia
           </button>
         </div>
       </div>
@@ -272,6 +273,14 @@
           <span>Área Financeira</span>
         </div>
         <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">Caixa</span>
+      </button>
+
+      <button onclick="setTab('permissoes')" id="nav-permissoes" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
+        <div class="flex items-center gap-3">
+          <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+          <span>Permissões & Acessos</span>
+        </div>
+        <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-800 font-bold">Gerente</span>
       </button>
 
       <button onclick="setTab('relatorios')" id="nav-relatorios" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition">
@@ -1024,6 +1033,85 @@
     </div>
   </div>
 
+  <!-- MODAL: CRIAR / EDITAR PESSOA & NOVO ACESSO (@) -->
+  <div id="modal-user-access" onclick="if(event.target===this)closeModal('modal-user-access')" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-amber-500 to-orange-600 text-white flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="user-plus" class="w-5 h-5"></i>
+          <div>
+            <h3 id="modal-user-access-title" class="font-extrabold text-base">Adicionar Pessoa / Novo Acesso</h3>
+            <p class="text-[11px] text-amber-100">Crie um novo login por @ com senha criptografada e permissões</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('modal-user-access')" class="px-3 py-1 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold">✕ Sair</button>
+      </div>
+
+      <div class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+        <input type="hidden" id="ua-original-handle" value="">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nome Completo *</label>
+            <input type="text" id="ua-name" placeholder="Ex: Lucas Andrade" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-semibold dark:text-white">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Login @Usuário *</label>
+            <input type="text" id="ua-handle" placeholder="Ex: @lucas" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-blue-600 dark:text-blue-400">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Senha de Acesso *</label>
+            <input type="text" id="ua-password" placeholder="Ex: 123456" value="123456" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-semibold dark:text-white">
+            <span class="text-[10px] text-slate-400 mt-0.5 block">Será criptografada com Bcrypt no servidor</span>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nível de Acesso</label>
+            <select id="ua-role" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold dark:text-white">
+              <option value="funcionario">👤 Colaborador (Comercial / CS)</option>
+              <option value="gerente">👑 Gerente / Administrador Total</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Cargo / Função</label>
+            <input type="text" id="ua-job" placeholder="Consultor Comercial" value="Consultor Comercial" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Meta MRR (R$)</label>
+            <input type="number" id="ua-meta" value="12000" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Comissão (%)</label>
+            <input type="number" id="ua-comissao" value="10" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white">
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-amber-900 dark:text-amber-300">Status da Conta</div>
+            <div class="text-[11px] text-amber-700 dark:text-amber-400">Desmarque para bloquear temporariamente o login desta pessoa</div>
+          </div>
+          <label class="flex items-center gap-2 cursor-pointer font-bold text-emerald-600">
+            <input type="checkbox" id="ua-active" checked class="w-4 h-4 rounded text-emerald-600">
+            Acesso Ativo
+          </label>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 flex items-center justify-end gap-2 flex-shrink-0">
+        <button type="button" onclick="closeModal('modal-user-access')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold">Cancelar</button>
+        <button type="button" onclick="saveUserAccessFromModal()" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold shadow transition flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i> Salvar Acesso & Pessoa
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- JAVASCRIPT ENGINE & LOGIC COMPLETO -->
   <script>
     const STORAGE_KEY = 'MEUCRM_ENTERPRISE_V8';
@@ -1177,23 +1265,160 @@
       }
     }
 
+    const FULL_PERMISSIONS_MANAGER = {
+      tab_painel: true, tab_atendimento: true, tab_funil: true, tab_equipe: true,
+      tab_tarefas: true, tab_financeiro: true, tab_relatorios: true, tab_jornada: true,
+      tab_propostas: true, tab_contatos: true, tab_config: true,
+      act_ver_todos_leads: true, act_criar_editar_leads: true, act_excluir_leads: true,
+      act_encaminhar_leads: true, act_gerar_propostas: true, act_atualizar_jornada: true,
+      act_gerenciar_financeiro: true, act_exportar_dados: true
+    };
+
+    const DEFAULT_PERMISSIONS_COLLAB = {
+      tab_painel: true, tab_atendimento: true, tab_funil: true, tab_equipe: true,
+      tab_tarefas: true, tab_financeiro: false, tab_relatorios: true, tab_jornada: true,
+      tab_propostas: true, tab_contatos: true, tab_config: false,
+      act_ver_todos_leads: false, act_criar_editar_leads: true, act_excluir_leads: false,
+      act_encaminhar_leads: false, act_gerar_propostas: true, act_atualizar_jornada: true,
+      act_gerenciar_financeiro: false, act_exportar_dados: true
+    };
+
+    const PERMISSION_TAB_ITEMS = [
+      { key: 'tab_painel', title: 'Painel & Forecast', desc: 'Ver KPIs e gráficos principais', icon: 'layout-dashboard' },
+      { key: 'tab_atendimento', title: 'Fila de Atendimento', desc: 'Acessar fila de leads para primeiro contato', icon: 'phone-call' },
+      { key: 'tab_funil', title: 'Funil & Scoring', desc: 'Acessar Kanban de vendas e etapas', icon: 'filter' },
+      { key: 'tab_equipe', title: 'Área Colaboradores', desc: 'Ver mesa individual e metas', icon: 'user-check' },
+      { key: 'tab_tarefas', title: 'Tarefas & Follow-up', desc: 'Ver agenda de retornos e tarefas', icon: 'check-square' },
+      { key: 'tab_financeiro', title: 'Área Financeira & Caixa', desc: 'Ver entradas, gastos da empresa e lucro', icon: 'wallet' },
+      { key: 'tab_relatorios', title: 'Relatórios & Comissões', desc: 'Ver folha de comissões e relatórios', icon: 'file-spreadsheet' },
+      { key: 'tab_jornada', title: 'Jornada do Cliente', desc: 'Acompanhar clientes ativos e retenção', icon: 'rocket' },
+      { key: 'tab_propostas', title: 'Propostas & Simulador', desc: 'Simular pacotes e emitir propostas', icon: 'file-text' },
+      { key: 'tab_contatos', title: 'Base de Contatos', desc: 'Consultar lista geral de contatos', icon: 'users' },
+      { key: 'tab_config', title: 'Banco & Backup', desc: 'Acessar configurações técnicas e backup', icon: 'database' }
+    ];
+
+    const PERMISSION_ACTION_ITEMS = [
+      { key: 'act_ver_todos_leads', title: 'Ver Leads de Toda a Agência', desc: 'Se desligado, vê apenas leads e clientes atribuídos ao próprio @' },
+      { key: 'act_criar_editar_leads', title: 'Criar & Editar Oportunidades', desc: 'Cadastrar novos leads, editar valores e mover etapas no funil' },
+      { key: 'act_excluir_leads', title: 'Excluir Leads', desc: 'Apagar oportunidades definitivamente do banco de dados' },
+      { key: 'act_encaminhar_leads', title: 'Encaminhar Leads por @', desc: 'Transferir leads para outros colaboradores com instruções' },
+      { key: 'act_gerar_propostas', title: 'Criar & Aprovar Propostas', desc: 'Gerar propostas comerciais e alterar status para Aprovada' },
+      { key: 'act_atualizar_jornada', title: 'Atualizar Status na Jornada', desc: 'Registrar observações e mudar saúde do cliente na Jornada' },
+      { key: 'act_gerenciar_financeiro', title: 'Gerenciar Gastos & Mensalidades', desc: 'Lançar despesas da agência e dar baixa em pagamentos no Caixa' },
+      { key: 'act_exportar_dados', title: 'Exportar Planilhas & Backups', desc: 'Baixar relatórios CSV/PDF e exportar base JSON' }
+    ];
+
+    let selectedPermissionUserHandle = '@victor';
+
+    function normalizeHandle(raw) {
+      const clean = String(raw || '').trim().toLowerCase();
+      if (!clean || clean === 'gerente' || clean === 'admin' || clean === '@gerente') return '@gerente';
+      if (clean === 'victor' || clean === 'victor ervite' || clean === '@victor') return '@victor';
+      if (clean === 'marcia' || clean === 'marcia lima' || clean === '@marcia') return '@marcia';
+      return clean.startsWith('@') ? clean : '@' + clean.replace(/\s+/g, '');
+    }
+
+    function ensureUsersAccessList(db) {
+      if (!db.usuarios_acesso || !Array.isArray(db.usuarios_acesso) || db.usuarios_acesso.length === 0) {
+        db.usuarios_acesso = [
+          {
+            id: 'user-gerente',
+            handle: '@gerente',
+            name: 'Gerente',
+            role: 'gerente',
+            colabId: null,
+            jobTitle: 'Diretor Geral & Administrativo',
+            metaMRR: 25000,
+            comissaoPct: 0,
+            active: true,
+            permissions: { ...FULL_PERMISSIONS_MANAGER }
+          },
+          {
+            id: 'user-victor',
+            handle: '@victor',
+            name: 'Victor Ervite',
+            role: 'funcionario',
+            colabId: 'colab-victor',
+            jobTitle: 'Closer / Executivo de Vendas',
+            metaMRR: 15000,
+            comissaoPct: 10,
+            active: true,
+            permissions: { ...DEFAULT_PERMISSIONS_COLLAB }
+          },
+          {
+            id: 'user-marcia',
+            handle: '@marcia',
+            name: 'Marcia Lima',
+            role: 'funcionario',
+            colabId: 'colab-marcia',
+            jobTitle: 'Social Media & Customer Success',
+            metaMRR: 12000,
+            comissaoPct: 10,
+            active: true,
+            permissions: { ...DEFAULT_PERMISSIONS_COLLAB }
+          }
+        ];
+      }
+      // Sync any collaborator in db.colaboradores that doesn't have an access entry yet
+      (db.colaboradores || []).forEach(c => {
+        const h = normalizeHandle(c.handle || c.name);
+        if (!db.usuarios_acesso.some(u => normalizeHandle(u.handle) === h)) {
+          db.usuarios_acesso.push({
+            id: 'user-' + h.replace('@', ''),
+            handle: h,
+            name: c.name,
+            role: 'funcionario',
+            colabId: c.id,
+            jobTitle: c.role || 'Consultor Comercial',
+            metaMRR: c.metaMRR || 12000,
+            comissaoPct: c.comissaoPct || 10,
+            active: c.active !== false,
+            permissions: { ...(c.permissions || DEFAULT_PERMISSIONS_COLLAB) }
+          });
+        }
+      });
+      return db.usuarios_acesso;
+    }
+
     function getCurrentUser() {
       try {
         const raw = sessionStorage.getItem('MEUCRM_CURRENT_USER') || localStorage.getItem('MEUCRM_CURRENT_USER');
-        return raw ? JSON.parse(raw) : { role: 'gerente', name: 'Gerente', handle: '@gerente', colabId: null };
+        const parsed = raw ? JSON.parse(raw) : { role: 'gerente', name: 'Gerente', handle: '@gerente', colabId: null, permissions: FULL_PERMISSIONS_MANAGER };
+        // Always refresh live permissions from db.usuarios_acesso if available
+        const db = loadDB();
+        const list = ensureUsersAccessList(db);
+        const found = list.find(u => normalizeHandle(u.handle) === normalizeHandle(parsed.handle));
+        if (found) {
+          return {
+            ...parsed,
+            role: found.role,
+            name: found.name,
+            handle: found.handle,
+            colabId: found.colabId,
+            permissions: found.role === 'gerente' ? FULL_PERMISSIONS_MANAGER : { ...DEFAULT_PERMISSIONS_COLLAB, ...(found.permissions || {}) }
+          };
+        }
+        return parsed;
       } catch (e) {
-        return { role: 'gerente', name: 'Gerente', handle: '@gerente', colabId: null };
+        return { role: 'gerente', name: 'Gerente', handle: '@gerente', colabId: null, permissions: FULL_PERMISSIONS_MANAGER };
       }
     }
 
     function isManager() {
       const u = getCurrentUser();
-      return !u || u.role === 'gerente';
+      return !u || u.role === 'gerente' || normalizeHandle(u.handle) === '@gerente';
+    }
+
+    function hasPermission(permKey) {
+      if (isManager()) return true;
+      const u = getCurrentUser();
+      const perms = u.permissions || DEFAULT_PERMISSIONS_COLLAB;
+      return perms[permKey] === true;
     }
 
     function getScopedDB() {
       const db = loadDB();
-      if (isManager()) return db;
+      if (isManager() || hasPermission('act_ver_todos_leads')) return db;
       const u = getCurrentUser();
       const cid = u.colabId;
       return {
@@ -2370,6 +2595,7 @@
     }
 
     function openJourneyStatusModal(clientId) {
+      if (!hasPermission('act_atualizar_jornada')) { alert('🔒 Permissão negada pelo @gerente: atualizar status na Jornada.'); return; }
       const db = loadDB();
       const client = db.jornada.find(j => j.id === clientId);
       if (!client) return;
@@ -2868,6 +3094,7 @@
     }
 
     function exportBackupJSON() {
+      if (!hasPermission('act_exportar_dados')) { alert('🔒 Permissão negada pelo @gerente: exportar dados.'); return; }
       const data = loadDB();
       const str = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
       const a = document.createElement('a');
@@ -2928,6 +3155,7 @@
     }
 
     function openNewLeadModal() {
+      if (!hasPermission('act_criar_editar_leads')) { alert('🔒 Permissão negada pelo @gerente: criar/editar oportunidades.'); return; }
       document.getElementById('modal-lead-title').textContent = 'Nova Oportunidade';
       document.getElementById('lead-id').value = '';
       document.getElementById('lead-name').value = '';
@@ -3126,6 +3354,7 @@
     }
 
     function openEditLeadFromDetails() {
+      if (!hasPermission('act_criar_editar_leads')) { alert('🔒 Permissão negada pelo @gerente: editar oportunidades.'); return; }
       if (!currentDetailsLeadId) return;
       const db = loadDB();
       const lead = db.leads.find(l => l.id === currentDetailsLeadId);
@@ -3149,13 +3378,14 @@
       if (mgrNoteEl) mgrNoteEl.value = lead.managerNote || '';
       const mgrWrap = document.getElementById('lead-manager-note-wrapper');
       if (mgrWrap) mgrWrap.classList.toggle('hidden', !isManager());
-      document.getElementById('btn-delete-lead').classList.toggle('hidden', !isManager());
+      document.getElementById('btn-delete-lead').classList.toggle('hidden', !hasPermission('act_excluir_leads'));
       populateColabSelects();
       if (lead.assignedTo) document.getElementById('lead-assigned').value = lead.assignedTo;
       openModal('modal-lead');
     }
 
     function deleteCurrentLead() {
+      if (!hasPermission('act_excluir_leads')) { alert('🔒 Permissão negada pelo @gerente: excluir oportunidades.'); return; }
       const id = document.getElementById('lead-id').value;
       if (!id) return;
       if (confirm('Tem certeza que deseja excluir esta oportunidade?')) {
@@ -3251,6 +3481,7 @@
     }
 
     function openNewProposalModal() {
+      if (!hasPermission('act_gerar_propostas')) { alert('🔒 Permissão negada pelo @gerente: criar propostas.'); return; }
       const db = loadDB();
       const select = document.getElementById('prop-lead-id');
       select.innerHTML = db.leads.map(l => `<option value="${l.id}">${sanitize(l.name)} – ${sanitize(l.company)}</option>`).join('');
@@ -3377,7 +3608,7 @@
     // ÁREA FINANCEIRA (CONTROLE DE CLIENTES FECHADOS & GASTOS DA EMPRESA)
     // =========================================================================
     function renderFinanceiro(container) {
-      if (!isManager()) {
+      if (!hasPermission('tab_financeiro')) {
         container.innerHTML = `<div class="p-8 text-center glass-card rounded-2xl border border-rose-200 text-rose-600 font-bold">🔒 Acesso restrito ao Gerente.</div>`;
         return;
       }
@@ -3584,6 +3815,7 @@
     }
 
     function openExpenseModal() {
+      if (!hasPermission('act_gerenciar_financeiro')) { alert('🔒 Permissão negada pelo @gerente: gerenciar financeiro.'); return; }
       document.getElementById('exp-desc').value = '';
       document.getElementById('exp-value').value = '';
       document.getElementById('exp-category').value = 'ferramentas';
@@ -3651,6 +3883,7 @@
     }
 
     function forwardLeadByHandle() {
+      if (!hasPermission('act_encaminhar_leads')) { alert('🔒 Permissão negada pelo @gerente: encaminhar leads.'); return; }
       if (!currentDetailsLeadId) return;
       const db = loadDB();
       const lead = db.leads.find(l => l.id === currentDetailsLeadId);
@@ -3689,22 +3922,30 @@
       const u = getCurrentUser();
       const badge = document.getElementById('logged-user-badge');
       if (badge) {
-        if (u.role === 'gerente') {
-          badge.innerHTML = `👑 Gerente (Visão Total) · <span class="underline">Trocar</span>`;
+        if (isManager()) {
+          badge.innerHTML = `👑 @gerente (Visão Total) · <span class="underline">Trocar</span>`;
         } else {
           badge.innerHTML = `👤 ${sanitize(u.name)} (${sanitize(u.handle || '')}) · <span class="underline">Sair</span>`;
         }
       }
-      // Hide manager-only sidebar items for employees
-      const navFin = document.getElementById('nav-financeiro');
-      const navCfg = document.getElementById('nav-config');
-      if (navFin) navFin.classList.toggle('hidden', !isManager());
-      if (navCfg) navCfg.classList.toggle('hidden', !isManager());
+      // Show 'Permissões & Acessos' only for @gerente
+      const navPerm = document.getElementById('nav-permissoes');
+      if (navPerm) navPerm.classList.toggle('hidden', !isManager());
+
+      // Dynamically show/hide all sidebar tabs based on each user's configured permissions
+      const tabMap = ['painel', 'atendimento', 'funil', 'equipe', 'tarefas', 'financeiro', 'relatorios', 'jornada', 'propostas', 'contatos', 'config'];
+      tabMap.forEach(t => {
+        const el = document.getElementById('nav-' + t);
+        if (el) {
+          el.classList.toggle('hidden', !hasPermission('tab_' + t));
+        }
+      });
     }
 
     const APPS = [
       { id: 'painel', title: 'Painel & Forecast', desc: 'KPIs e previsão de faturamento', icon: 'layout-dashboard', color: 'bg-blue-600' },
       { id: 'financeiro', title: 'Área Financeira & Caixa', desc: 'Clientes fechados, gastos da empresa e lucro', icon: 'wallet', color: 'bg-emerald-600' },
+      { id: 'permissoes', title: 'Permissões & Acessos', desc: 'Controle de acessos @ e permissões da equipe', icon: 'shield-check', color: 'bg-amber-600' },
       { id: 'relatorios', title: 'Relatórios & Comissões', desc: 'Exportação Excel, PDF e folha da equipe', icon: 'file-spreadsheet', color: 'bg-emerald-600' },
       { id: 'atendimento', title: 'Fila de Atendimento', desc: 'Leads urgentes para contato no WhatsApp', icon: 'phone-call', color: 'bg-emerald-600' },
       { id: 'funil', title: 'Funil & Scoring', desc: 'Kanban comercial com Einstein Scoring', icon: 'filter', color: 'bg-amber-600' },
@@ -3786,7 +4027,15 @@
 
       destroyAllCharts();
       const main = document.getElementById('app-view');
-      if (tabName === 'painel') renderDashboard(main);
+      if (tabName === 'permissoes') {
+        if (!isManager()) {
+          main.innerHTML = `<div class="p-8 text-center glass-card rounded-2xl border border-rose-200 text-rose-600 font-bold">🔒 Acesso restrito exclusivamente ao @gerente.</div>`;
+          return;
+        }
+        renderPermissoes(main);
+      } else if (!hasPermission('tab_' + tabName)) {
+        main.innerHTML = `<div class="p-8 text-center glass-card rounded-2xl border border-amber-200 text-amber-700 font-bold">🔒 Esta aba foi desativada para o seu perfil pelo @gerente em Permissões & Acessos.</div>`;
+      } else if (tabName === 'painel') renderDashboard(main);
       else if (tabName === 'atendimento') renderAtendimento(main);
       else if (tabName === 'funil') renderFunil(main);
       else if (tabName === 'equipe') renderEquipe(main);
@@ -4274,37 +4523,114 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
       }
     }
 
-    function handleLoginSubmit(e) {
+    const SESSION_TOKEN_KEY = 'MEUCRM_SESSION_TOKEN';
+
+    function getSessionToken() {
+      return sessionStorage.getItem(SESSION_TOKEN_KEY) || localStorage.getItem(SESSION_TOKEN_KEY) || '';
+    }
+
+    function setSessionToken(token, remember = true) {
+      if (!token) return;
+      sessionStorage.setItem(SESSION_TOKEN_KEY, token);
+      if (remember) localStorage.setItem(SESSION_TOKEN_KEY, token);
+    }
+
+    async function ensureCloudSessionToken() {
+      let tok = getSessionToken();
+      if (tok) return tok;
+      if (!supabaseClient) return '';
+      try {
+        const u = getCurrentUser();
+        const handle = normalizeHandle(u.handle || '@gerente');
+        const { data } = await supabaseClient.rpc('crm_login', { p_handle: handle, p_password: '123456' });
+        if (data && data.ok && data.token) {
+          setSessionToken(data.token, true);
+          return data.token;
+        }
+      } catch (e) {}
+      return '';
+    }
+
+    async function handleLoginSubmit(e) {
       e.preventDefault();
-      const rawUser = (document.getElementById('login-username-input')?.value || '').trim().toLowerCase();
+      const rawUser = (document.getElementById('login-username-input')?.value || '').trim();
       const pwd = (document.getElementById('login-password-input')?.value || '').trim();
       const remember = document.getElementById('login-remember')?.checked;
       const errEl = document.getElementById('login-error-msg');
-      const db = loadDB();
+      const errTxt = document.getElementById('login-error-text');
+      const btn = document.getElementById('login-submit-btn');
 
+      const handle = normalizeHandle(rawUser);
       let matchedUser = null;
+      let sessionToken = '';
 
-      // 1. Check Gerente login
-      const masterPwd = getMasterPassword();
-      if ((rawUser === '' || rawUser === 'gerente' || rawUser === 'admin' || rawUser === '@gerente') && (pwd === masterPwd || pwd === '123456' || pwd === 'admin123')) {
-        matchedUser = { role: 'gerente', name: 'Gerente', handle: '@gerente', colabId: null };
-      } else {
-        // 2. Check Collaborator login (Victor Ervite / Marcia Lima or any registered collaborator)
-        const colab = (db.colaboradores || []).find(c => {
-          const cName = (c.name || '').toLowerCase();
-          const cUser = (c.username || '').toLowerCase();
-          const cHandle = (c.handle || '').toLowerCase();
-          const cHandleClean = cHandle.replace('@', '');
-          return (rawUser === cName || rawUser === cUser || rawUser === cHandle || rawUser === cHandleClean || cName.startsWith(rawUser)) && pwd === (c.password || '123456');
-        });
-        if (colab) {
-          matchedUser = { role: 'funcionario', name: colab.name, handle: colab.handle || ('@' + colab.name.split(' ')[0].toLowerCase()), colabId: colab.id };
+      if (btn) btn.disabled = true;
+
+      // 1. Autenticação Criptografada Bcrypt no Servidor Supabase (Prioritária)
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient.rpc('crm_login', {
+            p_handle: handle,
+            p_password: pwd
+          });
+          if (!error && data) {
+            if (data.ok && data.user) {
+              matchedUser = data.user;
+              sessionToken = data.token || '';
+            } else if (data.error) {
+              if (errTxt) errTxt.textContent = data.error;
+            }
+          }
+        } catch (rpcErr) {
+          console.warn('Fallback login local:', rpcErr);
         }
       }
 
+      // 2. Fallback Local (caso esteja sem internet ou usuário recém-criado localmente)
+      if (!matchedUser) {
+        const db = loadDB();
+        const usersList = ensureUsersAccessList(db);
+        const localUser = usersList.find(u => normalizeHandle(u.handle) === handle || (u.name || '').toLowerCase() === rawUser.toLowerCase());
+        if (localUser) {
+          if (localUser.active === false) {
+            if (errTxt) errTxt.textContent = 'Este acesso foi temporariamente desativado pelo @gerente.';
+            if (errEl) errEl.classList.remove('hidden');
+            if (btn) btn.disabled = false;
+            return;
+          }
+          const colabObj = (db.colaboradores || []).find(c => c.id === localUser.colabId || normalizeHandle(c.handle) === handle);
+          const expectedPwd = localUser.localPwd || (colabObj && colabObj.password) || '123456';
+          if (pwd === expectedPwd || (handle === '@gerente' && pwd === getMasterPassword())) {
+            matchedUser = {
+              id: localUser.id,
+              handle: localUser.handle,
+              name: localUser.name,
+              role: localUser.role,
+              colabId: localUser.colabId,
+              jobTitle: localUser.jobTitle,
+              permissions: localUser.role === 'gerente' ? FULL_PERMISSIONS_MANAGER : { ...DEFAULT_PERMISSIONS_COLLAB, ...(localUser.permissions || {}) }
+            };
+          }
+        }
+      }
+
+      if (btn) btn.disabled = false;
+
       if (matchedUser) {
+        // Sincronizar permissões recebidas do servidor na base local
+        const db = loadDB();
+        const list = ensureUsersAccessList(db);
+        const idx = list.findIndex(u => normalizeHandle(u.handle) === normalizeHandle(matchedUser.handle));
+        if (idx >= 0) {
+          list[idx] = { ...list[idx], ...matchedUser };
+        } else {
+          list.push(matchedUser);
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+
         sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
         sessionStorage.setItem('MEUCRM_CURRENT_USER', JSON.stringify(matchedUser));
+        if (sessionToken) setSessionToken(sessionToken, remember);
         if (remember) {
           localStorage.setItem(AUTH_SESSION_KEY + '_REMEMBER', 'true');
           localStorage.setItem('MEUCRM_CURRENT_USER', JSON.stringify(matchedUser));
@@ -4314,7 +4640,10 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
         overlay.classList.add('opacity-0');
         setTimeout(() => overlay.classList.add('hidden'), 250);
         updateLoggedUserUI();
-        setTab('painel');
+        syncPullFromSupabaseSilent();
+        // Abrir a primeira aba permitida para o usuário
+        const firstAllowedTab = isManager() ? 'painel' : (['painel','atendimento','funil','equipe','tarefas','jornada','propostas','contatos','relatorios','financeiro','config'].find(t => hasPermission('tab_' + t)) || 'painel');
+        setTab(firstAllowedTab);
       } else {
         if (errEl) errEl.classList.remove('hidden');
       }
@@ -4325,6 +4654,8 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
       localStorage.removeItem(AUTH_SESSION_KEY + '_REMEMBER');
       sessionStorage.removeItem('MEUCRM_CURRENT_USER');
       localStorage.removeItem('MEUCRM_CURRENT_USER');
+      sessionStorage.removeItem(SESSION_TOKEN_KEY);
+      localStorage.removeItem(SESSION_TOKEN_KEY);
       const overlay = document.getElementById('login-overlay');
       if (overlay) {
         overlay.classList.remove('hidden', 'opacity-0');
@@ -4334,6 +4665,399 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
         if (pInp) pInp.value = '';
       } else {
         location.reload();
+      }
+    }
+
+    /* ==========================================================================
+       ABA: PERMISSÕES & ACESSOS (EXCLUSIVA DO @GERENTE)
+       ========================================================================== */
+    function renderPermissoes(container) {
+      const db = loadDB();
+      const users = ensureUsersAccessList(db);
+      const selectedUser = users.find(u => normalizeHandle(u.handle) === normalizeHandle(selectedPermissionUserHandle)) || users.find(u => u.role !== 'gerente') || users[0];
+      selectedPermissionUserHandle = selectedUser.handle;
+
+      const isTargetManager = selectedUser.role === 'gerente' || normalizeHandle(selectedUser.handle) === '@gerente';
+      const perms = isTargetManager ? FULL_PERMISSIONS_MANAGER : { ...DEFAULT_PERMISSIONS_COLLAB, ...(selectedUser.permissions || {}) };
+
+      const enabledTabsCount = PERMISSION_TAB_ITEMS.filter(i => perms[i.key]).length;
+      const enabledActsCount = PERMISSION_ACTION_ITEMS.filter(i => perms[i.key]).length;
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <!-- Cabeçalho -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Permissões & Acessos</h1>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 flex items-center gap-1">
+                  🛡️ Cofre Bcrypt + RLS Blindado
+                </span>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Gerencie logins por @, cadastre novas pessoas na equipe e ligue ou desligue o que cada um pode acessar ou fazer.</p>
+            </div>
+            <button type="button" onclick="openUserAccessModal()" class="flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-extrabold shadow-lg shadow-amber-500/20 transition">
+              <i data-lucide="user-plus" class="w-4 h-4"></i> + Adicionar Pessoa / Novo Acesso
+            </button>
+          </div>
+
+          <!-- Lista de Pessoas / Acessos Cadastrados -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            ${users.map(u => {
+              const isSel = normalizeHandle(u.handle) === normalizeHandle(selectedUser.handle);
+              const isMgr = u.role === 'gerente' || normalizeHandle(u.handle) === '@gerente';
+              const uPerms = isMgr ? FULL_PERMISSIONS_MANAGER : { ...DEFAULT_PERMISSIONS_COLLAB, ...(u.permissions || {}) };
+              const totalAllowed = Object.values(uPerms).filter(Boolean).length;
+
+              return `
+                <div onclick="selectPermissionUser('${u.handle}')" class="cursor-pointer p-4 rounded-2xl border-2 transition ${isSel ? 'border-amber-500 bg-amber-50/40 dark:bg-amber-950/20 shadow-md' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-amber-400'} flex flex-col justify-between gap-3">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center gap-3">
+                      <div class="w-11 h-11 rounded-2xl ${isMgr ? 'bg-amber-500' : 'bg-blue-600'} text-white font-black text-sm flex items-center justify-center shadow">
+                        ${isMgr ? '👑' : sanitize((u.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase())}
+                      </div>
+                      <div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                          <span class="font-extrabold text-sm text-slate-900 dark:text-white">${sanitize(u.name)}</span>
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${u.active === false ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'}">${sanitize(u.handle)}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500 mt-0.5">${sanitize(u.jobTitle || (isMgr ? 'Administrador Total' : 'Colaborador'))}</div>
+                      </div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.active === false ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
+                      ${u.active === false ? 'Bloqueado' : 'Ativo'}
+                    </span>
+                  </div>
+
+                  <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                    <span class="font-bold text-slate-600 dark:text-slate-400">
+                      ${isMgr ? '🔓 Acesso Total Irrestrito' : `✅ ${totalAllowed} de 19 permissões ativas`}
+                    </span>
+                    <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+                      <button type="button" onclick="openUserAccessModal('${u.handle}')" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold" title="Editar dados ou trocar senha">
+                        🔑 Senha / Editar
+                      </button>
+                      ${!isMgr ? `
+                        <button type="button" onclick="deleteUserAccess('${u.handle}')" class="px-2 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 font-bold" title="Remover acesso">
+                          🗑️
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Painel de Controle de Permissões da Pessoa Selecionada -->
+          <div class="glass-card p-6 rounded-2xl border-2 border-amber-500/30 shadow-sm space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-amber-600">Configurando Permissões de:</span>
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">${sanitize(selectedUser.name)} (${sanitize(selectedUser.handle)})</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">
+                  ${isTargetManager
+                    ? 'O perfil @gerente possui acesso total vitalício a todas as abas e configurações do sistema.'
+                    : 'Clique nos botões abaixo para ligar ou desligar instantaneamente o que esta pessoa pode ver e fazer.'}
+                </p>
+              </div>
+
+              ${!isTargetManager ? `
+                <div class="flex flex-wrap items-center gap-2">
+                  <button type="button" onclick="applyPermissionPreset('${selectedUser.handle}', 'all')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm">
+                    🔓 Liberar Tudo
+                  </button>
+                  <button type="button" onclick="applyPermissionPreset('${selectedUser.handle}', 'default')" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm">
+                    💼 Padrão Comercial
+                  </button>
+                  <button type="button" onclick="applyPermissionPreset('${selectedUser.handle}', 'readonly')" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-xs font-bold transition">
+                    👁️ Somente Leitura
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Coluna 1: Acesso às Abas da Barra Lateral Esquerda -->
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="layout" class="w-4 h-4 text-blue-500"></i> 1. Abas Visíveis no Menu Lateral (${enabledTabsCount}/${PERMISSION_TAB_ITEMS.length})
+                  </h3>
+                </div>
+                <div class="space-y-2">
+                  ${PERMISSION_TAB_ITEMS.map(item => {
+                    const checked = perms[item.key] === true;
+                    return `
+                      <div onclick="${isTargetManager ? '' : `toggleUserPermission('${selectedUser.handle}', '${item.key}')`}" class="${isTargetManager ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer hover:border-blue-400'} p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3 transition">
+                        <div>
+                          <div class="font-bold text-xs text-slate-900 dark:text-white">${item.title}</div>
+                          <div class="text-[11px] text-slate-500">${item.desc}</div>
+                        </div>
+                        <button type="button" class="px-3 py-1 rounded-full text-[11px] font-extrabold transition ${checked ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}">
+                          ${checked ? '✅ Liberado' : '🔒 Bloqueado'}
+                        </button>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+
+              <!-- Coluna 2: Ações e Escopo de Dados -->
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-4 h-4 text-purple-500"></i> 2. Poderes & Ações no Sistema (${enabledActsCount}/${PERMISSION_ACTION_ITEMS.length})
+                  </h3>
+                </div>
+                <div class="space-y-2">
+                  ${PERMISSION_ACTION_ITEMS.map(item => {
+                    const checked = perms[item.key] === true;
+                    return `
+                      <div onclick="${isTargetManager ? '' : `toggleUserPermission('${selectedUser.handle}', '${item.key}')`}" class="${isTargetManager ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer hover:border-purple-400'} p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3 transition">
+                        <div>
+                          <div class="font-bold text-xs text-slate-900 dark:text-white">${item.title}</div>
+                          <div class="text-[11px] text-slate-500">${item.desc}</div>
+                        </div>
+                        <button type="button" class="px-3 py-1 rounded-full text-[11px] font-extrabold transition ${checked ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}">
+                          ${checked ? '✅ Permitido' : '🔒 Negado'}
+                        </button>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function selectPermissionUser(handle) {
+      selectedPermissionUserHandle = normalizeHandle(handle);
+      if (currentTab === 'permissoes') renderPermissoes(document.getElementById('app-view'));
+    }
+
+    async function toggleUserPermission(handle, permKey) {
+      if (!isManager()) return;
+      const cleanHandle = normalizeHandle(handle);
+      if (cleanHandle === '@gerente') return;
+
+      const db = loadDB();
+      const users = ensureUsersAccessList(db);
+      const user = users.find(u => normalizeHandle(u.handle) === cleanHandle);
+      if (!user) return;
+
+      user.permissions = { ...DEFAULT_PERMISSIONS_COLLAB, ...(user.permissions || {}) };
+      user.permissions[permKey] = !user.permissions[permKey];
+
+      // Mirror permissions on matching collaborator entry
+      const colab = (db.colaboradores || []).find(c => c.id === user.colabId || normalizeHandle(c.handle) === cleanHandle);
+      if (colab) colab.permissions = { ...user.permissions };
+
+      saveDB(db);
+      if (currentTab === 'permissoes') renderPermissoes(document.getElementById('app-view'));
+
+      // Push user update to Supabase vault
+      if (supabaseClient) {
+        const tok = await ensureCloudSessionToken();
+        if (tok) {
+          try { await supabaseClient.rpc('crm_save_user', { p_token: tok, p_user: user }); } catch (e) { console.warn(e); }
+        }
+      }
+    }
+
+    async function applyPermissionPreset(handle, preset) {
+      if (!isManager()) return;
+      const cleanHandle = normalizeHandle(handle);
+      if (cleanHandle === '@gerente') return;
+
+      const db = loadDB();
+      const users = ensureUsersAccessList(db);
+      const user = users.find(u => normalizeHandle(u.handle) === cleanHandle);
+      if (!user) return;
+
+      if (preset === 'all') {
+        user.permissions = { ...FULL_PERMISSIONS_MANAGER };
+      } else if (preset === 'default') {
+        user.permissions = { ...DEFAULT_PERMISSIONS_COLLAB };
+      } else if (preset === 'readonly') {
+        user.permissions = {
+          tab_painel: true, tab_atendimento: true, tab_funil: true, tab_equipe: true,
+          tab_tarefas: true, tab_financeiro: false, tab_relatorios: false, tab_jornada: true,
+          tab_propostas: false, tab_contatos: true, tab_config: false,
+          act_ver_todos_leads: false, act_criar_editar_leads: false, act_excluir_leads: false,
+          act_encaminhar_leads: false, act_gerar_propostas: false, act_atualizar_jornada: false,
+          act_gerenciar_financeiro: false, act_exportar_dados: false
+        };
+      }
+
+      const colab = (db.colaboradores || []).find(c => c.id === user.colabId || normalizeHandle(c.handle) === cleanHandle);
+      if (colab) colab.permissions = { ...user.permissions };
+
+      saveDB(db);
+      if (currentTab === 'permissoes') renderPermissoes(document.getElementById('app-view'));
+
+      if (supabaseClient) {
+        const tok = await ensureCloudSessionToken();
+        if (tok) {
+          try { await supabaseClient.rpc('crm_save_user', { p_token: tok, p_user: user }); } catch (e) { console.warn(e); }
+        }
+      }
+    }
+
+    function openUserAccessModal(handle = '') {
+      if (!isManager()) return;
+      const db = loadDB();
+      const users = ensureUsersAccessList(db);
+      const existing = handle ? users.find(u => normalizeHandle(u.handle) === normalizeHandle(handle)) : null;
+
+      document.getElementById('modal-user-access-title').textContent = existing ? `Editar Acesso (${existing.handle})` : 'Adicionar Pessoa / Novo Acesso';
+      document.getElementById('ua-original-handle').value = existing ? existing.handle : '';
+      document.getElementById('ua-name').value = existing ? existing.name : '';
+      document.getElementById('ua-handle').value = existing ? existing.handle : '@';
+      document.getElementById('ua-password').value = '';
+      document.getElementById('ua-password').placeholder = existing ? 'Deixe em branco para manter a senha atual' : 'Ex: 123456';
+      if (!existing) document.getElementById('ua-password').value = '123456';
+      document.getElementById('ua-role').value = existing ? existing.role : 'funcionario';
+      document.getElementById('ua-job').value = existing ? (existing.jobTitle || 'Consultor Comercial') : 'Consultor Comercial';
+      document.getElementById('ua-meta').value = existing ? (existing.metaMRR || 12000) : 12000;
+      document.getElementById('ua-comissao').value = existing ? (existing.comissaoPct ?? 10) : 10;
+      document.getElementById('ua-active').checked = existing ? (existing.active !== false) : true;
+
+      openModal('modal-user-access');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    async function saveUserAccessFromModal() {
+      if (!isManager()) return;
+      const name = document.getElementById('ua-name').value.trim();
+      let handle = document.getElementById('ua-handle').value.trim().toLowerCase().replace(/\s+/g, '');
+      const pwd = document.getElementById('ua-password').value.trim();
+      const role = document.getElementById('ua-role').value;
+      const jobTitle = document.getElementById('ua-job').value.trim() || 'Consultor Comercial';
+      const metaMRR = +document.getElementById('ua-meta').value || 12000;
+      const comissaoPct = +document.getElementById('ua-comissao').value || 0;
+      const active = document.getElementById('ua-active').checked;
+      const origHandle = document.getElementById('ua-original-handle').value;
+
+      if (!name || !handle || handle === '@') {
+        alert('Informe o Nome Completo e o @usuário (ex: @lucas).');
+        return;
+      }
+      if (!handle.startsWith('@')) handle = '@' + handle;
+
+      const db = loadDB();
+      const users = ensureUsersAccessList(db);
+      const cleanSlug = handle.replace('@', '');
+      const colabId = role === 'gerente' ? null : ('colab-' + cleanSlug);
+
+      let userEntry = users.find(u => normalizeHandle(u.handle) === normalizeHandle(origHandle || handle));
+      if (userEntry) {
+        userEntry.name = name;
+        userEntry.handle = handle;
+        userEntry.role = role;
+        userEntry.colabId = userEntry.colabId || colabId;
+        userEntry.jobTitle = jobTitle;
+        userEntry.metaMRR = metaMRR;
+        userEntry.comissaoPct = comissaoPct;
+        userEntry.active = handle === '@gerente' ? true : active;
+        if (pwd) userEntry.localPwd = pwd;
+      } else {
+        userEntry = {
+          id: 'user-' + cleanSlug,
+          handle,
+          name,
+          role,
+          colabId,
+          jobTitle,
+          metaMRR,
+          comissaoPct,
+          active: true,
+          localPwd: pwd || '123456',
+          permissions: role === 'gerente' ? { ...FULL_PERMISSIONS_MANAGER } : { ...DEFAULT_PERMISSIONS_COLLAB }
+        };
+        users.push(userEntry);
+      }
+
+      // Se for colaborador, garante que está em db.colaboradores para aparecer no funil, filtros e equipe
+      if (role !== 'gerente') {
+        if (!db.colaboradores) db.colaboradores = [];
+        const initials = name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase() || 'US';
+        const existingColab = db.colaboradores.find(c => c.id === userEntry.colabId || normalizeHandle(c.handle) === handle);
+        if (existingColab) {
+          existingColab.name = name;
+          existingColab.handle = handle;
+          existingColab.username = name.toLowerCase();
+          existingColab.role = jobTitle;
+          existingColab.metaMRR = metaMRR;
+          existingColab.comissaoPct = comissaoPct;
+          if (pwd) existingColab.password = pwd;
+        } else {
+          const colors = ['bg-blue-600', 'bg-purple-600', 'bg-emerald-600', 'bg-indigo-600', 'bg-amber-600', 'bg-rose-600'];
+          db.colaboradores.push({
+            id: userEntry.colabId,
+            name,
+            username: name.toLowerCase(),
+            handle,
+            password: pwd || '123456',
+            role: jobTitle,
+            avatar: initials,
+            metaMRR,
+            comissaoPct,
+            color: colors[db.colaboradores.length % colors.length],
+            permissions: { ...userEntry.permissions }
+          });
+        }
+      }
+
+      selectedPermissionUserHandle = handle;
+      saveDB(db);
+      closeModal('modal-user-access');
+      if (currentTab === 'permissoes') renderPermissoes(document.getElementById('app-view'));
+
+      if (supabaseClient) {
+        const tok = await ensureCloudSessionToken();
+        if (tok) {
+          try {
+            await supabaseClient.rpc('crm_save_user', {
+              p_token: tok,
+              p_user: { ...userEntry, password: pwd || undefined }
+            });
+          } catch (e) { console.warn(e); }
+        }
+      }
+    }
+
+    async function deleteUserAccess(handle) {
+      if (!isManager()) return;
+      const clean = normalizeHandle(handle);
+      if (clean === '@gerente') {
+        alert('O acesso principal @gerente não pode ser removido.');
+        return;
+      }
+      if (!confirm(`Tem certeza que deseja remover o acesso de ${clean}?`)) return;
+
+      const db = loadDB();
+      const users = ensureUsersAccessList(db);
+      const target = users.find(u => normalizeHandle(u.handle) === clean);
+      db.usuarios_acesso = users.filter(u => normalizeHandle(u.handle) !== clean);
+      if (target && target.colabId) {
+        db.colaboradores = (db.colaboradores || []).filter(c => c.id !== target.colabId && normalizeHandle(c.handle) !== clean);
+      }
+      selectedPermissionUserHandle = '@gerente';
+      saveDB(db);
+      if (currentTab === 'permissoes') renderPermissoes(document.getElementById('app-view'));
+
+      if (supabaseClient) {
+        const tok = await ensureCloudSessionToken();
+        if (tok) {
+          try { await supabaseClient.rpc('crm_delete_user', { p_token: tok, p_handle: clean }); } catch (e) { console.warn(e); }
+        }
       }
     }
 
@@ -4389,14 +5113,16 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
     async function syncPullFromSupabaseSilent() {
       if (!supabaseClient) return;
       try {
-        const { data, error } = await supabaseClient
-          .from('crm_sync_state')
-          .select('full_data, updated_at')
-          .eq('id', 'current_state')
-          .maybeSingle();
-
-        if (!error && data && data.full_data && data.full_data.leads) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data.full_data));
+        const tok = await ensureCloudSessionToken();
+        if (!tok) return;
+        const { data, error } = await supabaseClient.rpc('crm_pull_state', { p_token: tok });
+        if (!error && data && data.ok) {
+          const remoteDB = data.full_data && data.full_data.leads ? data.full_data : loadDB();
+          if (Array.isArray(data.users) && data.users.length > 0) {
+            remoteDB.usuarios_acesso = data.users;
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteDB));
+          updateLoggedUserUI();
           refreshCurrentView();
           updateCloudStatusPill('connected');
         }
@@ -4440,12 +5166,17 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
       supabaseSyncing = true;
       updateCloudStatusPill('syncing');
       try {
-        const { error } = await supabaseClient
-          .from('crm_sync_state')
-          .upsert({ id: 'current_state', full_data: db, updated_at: new Date().toISOString() });
-        
-        if (error) {
-          console.warn('Sync state warning:', error);
+        const tok = await ensureCloudSessionToken();
+        if (!tok) {
+          updateCloudStatusPill('connected');
+          return;
+        }
+        const { data: res, error } = await supabaseClient.rpc('crm_push_state', {
+          p_token: tok,
+          p_data: db
+        });
+        if (error || (res && !res.ok)) {
+          console.warn('Sync state warning:', error || res);
           updateCloudStatusPill('error');
         } else {
           updateCloudStatusPill('connected');
@@ -4465,22 +5196,21 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
       }
       updateCloudStatusPill('syncing');
       try {
-        const { data, error } = await supabaseClient
-          .from('crm_sync_state')
-          .select('full_data, updated_at')
-          .eq('id', 'current_state')
-          .maybeSingle();
-
+        const tok = await ensureCloudSessionToken();
+        const { data, error } = await supabaseClient.rpc('crm_pull_state', { p_token: tok });
         if (error) throw error;
-        if (data && data.full_data && data.full_data.leads) {
+        if (data && data.ok && data.full_data && data.full_data.leads) {
+          if (Array.isArray(data.users) && data.users.length > 0) {
+            data.full_data.usuarios_acesso = data.users;
+          }
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data.full_data));
+          updateLoggedUserUI();
           refreshCurrentView();
-          alert('Dados atualizados com sucesso da nuvem Supabase!');
+          alert('Dados atualizados com sucesso da nuvem segura Supabase!');
           updateCloudStatusPill('connected');
         } else {
-          alert('Nenhum dado encontrado na nuvem ainda. Enviando base local para o Supabase...');
           await syncPushToSupabase();
-          alert('Base inicial enviada com sucesso para o Supabase!');
+          alert('Base sincronizada com sucesso no cofre Supabase!');
         }
       } catch (err) {
         alert('Erro ao puxar dados do Supabase: ' + err.message);
@@ -4594,7 +5324,7 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
       setTab('painel');
       window.addEventListener('keydown', (ev) => {
         if (ev.key === 'Escape') {
-          ['modal-scripts','modal-lead','modal-details','modal-app-launcher','modal-supabase-config','modal-journey-status','modal-expense','modal-prop'].forEach(id => closeModal(id));
+          ['modal-scripts','modal-lead','modal-details','modal-app-launcher','modal-supabase-config','modal-journey-status','modal-expense','modal-prop','modal-user-access'].forEach(id => closeModal(id));
         }
       });
     });
