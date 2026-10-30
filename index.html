@@ -1112,6 +1112,11 @@
     </div>
   </div>
 
+  <!-- MODAL: CARTÃO DE TAREFA (ESTILO TRELLO) -->
+  <div id="modal-card" onclick="if(event.target===this)closeCardModal()" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+    <div id="card-modal-body" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"></div>
+  </div>
+
   <!-- JAVASCRIPT ENGINE & LOGIC COMPLETO -->
   <script>
     const STORAGE_KEY = 'MEUCRM_ENTERPRISE_V8';
@@ -1259,6 +1264,7 @@
           if (!j.statusUpdates) j.statusUpdates = [];
           if (typeof j.paidThisMonth === 'undefined') j.paidThisMonth = true;
         });
+        if (typeof ensureBoard === 'function') ensureBoard(parsed);
         return parsed;
       } catch (e) {
         return JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -1498,7 +1504,7 @@
       return 'R$ ' + Number(v || 0).toLocaleString('pt-BR');
     }
     function sanitize(s) {
-      return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]);
+      return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
     }
     function serviceName(val) {
       const map = {
@@ -2669,7 +2675,7 @@
       }
     }
 
-    function renderTarefas(container) {
+    function renderFollowupsLeads(container) {
       const db = getScopedDB();
       const today = new Date().toISOString().split('T')[0];
       const tasks = db.leads.filter(l => l.nextStep).map(l => ({
@@ -2681,12 +2687,6 @@
 
       container.innerHTML = `
         <div class="space-y-6">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Tarefas & Follow-up Diário</h1>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Nunca perca o timing de uma ligação ou proposta comercial.</p>
-            </div>
-          </div>
 
           <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
@@ -2721,6 +2721,582 @@
           </div>
         </div>
       `;
+    }
+
+    /* ==========================================================================
+       TAREFAS ESTILO TRELLO (QUADRO KANBAN DA EQUIPE)
+       ========================================================================== */
+    const BOARD_LABELS = [
+      { key: 'verde', name: 'Baixa prioridade', cls: 'bg-emerald-500' },
+      { key: 'amarelo', name: 'Média prioridade', cls: 'bg-yellow-400' },
+      { key: 'laranja', name: 'Alta prioridade', cls: 'bg-orange-500' },
+      { key: 'vermelho', name: 'Urgente', cls: 'bg-rose-600' },
+      { key: 'roxo', name: 'Criação / Design', cls: 'bg-purple-500' },
+      { key: 'azul', name: 'Cliente / Atendimento', cls: 'bg-blue-500' }
+    ];
+    let tarefasView = 'quadro';
+    let boardFilters = { member: 'all', label: 'all', due: 'all', q: '' };
+    let addingCardListId = null;
+    let dragCardId = null;
+    let currentCardId = null;
+    let boardSearchTimer = null;
+
+    function boardUid(prefix) { return prefix + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+    function boardToday() { return new Date().toISOString().split('T')[0]; }
+    function boardFmtDate(d) { if (!d) return ''; const p = d.split('-'); return p[2] + '/' + p[1]; }
+
+    function ensureBoard(db) {
+      if (!db.quadro || !Array.isArray(db.quadro.listas) || db.quadro.listas.length === 0) {
+        db.quadro = {
+          listas: [
+            { id: 'lst-afazer', title: '📥 A Fazer', order: 0 },
+            { id: 'lst-fazendo', title: '⚙️ Fazendo', order: 1 },
+            { id: 'lst-revisao', title: '👀 Em Revisão', order: 2 },
+            { id: 'lst-feito', title: '✅ Concluído', order: 3 }
+          ],
+          cartoes: [
+            {
+              id: 'crd-exemplo', listId: 'lst-afazer', title: 'Exemplo: calendário de posts de novembro',
+              desc: 'Clique no cartão para ver checklist, membros, etiquetas, prazo e comentários.',
+              members: ['colab-marcia'], labels: ['roxo'], dueDate: boardToday(), dueDone: false,
+              checklist: [{ id: 'chk-1', text: 'Levantar datas comemorativas', done: true }, { id: 'chk-2', text: 'Aprovar pautas com o cliente', done: false }],
+              atividade: [], leadId: null, createdBy: 'gerente', createdAt: Date.now(), order: 0, archived: false
+            }
+          ]
+        };
+      }
+      if (!Array.isArray(db.quadro.cartoes)) db.quadro.cartoes = [];
+      return db.quadro;
+    }
+
+    function boardMembers(db) {
+      return [{ id: 'gerente', name: 'Gerente', avatar: '👑', color: 'bg-amber-500' }]
+        .concat((db.colaboradores || []).map(c => ({
+          id: c.id, name: c.name,
+          avatar: c.avatar || (c.name || '?').slice(0, 2).toUpperCase(),
+          color: c.color || 'bg-blue-600'
+        })));
+    }
+    function boardMyId() { return isManager() ? 'gerente' : (getCurrentUser().colabId || 'gerente'); }
+    function boardCanSeeAll() { return isManager() || hasPermission('act_ver_todos_leads'); }
+    function boardCanDelete(card) { return isManager() || card.createdBy === boardMyId(); }
+    function boardListTitle(db, id) { const l = db.quadro.listas.find(x => x.id === id); return l ? l.title : '?'; }
+
+    function boardCardVisible(card) {
+      const me = boardMyId();
+      if (boardFilters.due === 'archived') { if (!card.archived) return false; }
+      else if (card.archived) return false;
+      if (!boardCanSeeAll() && !(card.members || []).includes(me) && card.createdBy !== me) return false;
+      if (boardFilters.member === 'me' && !(card.members || []).includes(me)) return false;
+      if (!['all', 'me'].includes(boardFilters.member) && !(card.members || []).includes(boardFilters.member)) return false;
+      if (boardFilters.label !== 'all' && !(card.labels || []).includes(boardFilters.label)) return false;
+      const today = boardToday();
+      if (boardFilters.due === 'overdue' && !(card.dueDate && !card.dueDone && card.dueDate < today)) return false;
+      if (boardFilters.due === 'today' && !(card.dueDate && !card.dueDone && card.dueDate === today)) return false;
+      if (boardFilters.due === 'nodate' && card.dueDate) return false;
+      if (boardFilters.q) {
+        const q = boardFilters.q.toLowerCase();
+        if (!((card.title || '').toLowerCase().includes(q) || (card.desc || '').toLowerCase().includes(q))) return false;
+      }
+      return true;
+    }
+
+    function cardDueInfo(card) {
+      if (!card.dueDate) return null;
+      const today = boardToday();
+      if (card.dueDone) return { cls: 'bg-emerald-500 text-white', txt: '✓ ' + boardFmtDate(card.dueDate) };
+      if (card.dueDate < today) return { cls: 'bg-rose-500 text-white', txt: '⚠️ ' + boardFmtDate(card.dueDate) };
+      if (card.dueDate === today) return { cls: 'bg-amber-400 text-amber-950', txt: '⏰ Hoje' };
+      return { cls: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200', txt: '📅 ' + boardFmtDate(card.dueDate) };
+    }
+
+    function renderTarefas(container) {
+      const db = loadDB();
+      ensureBoard(db);
+      const scoped = getScopedDB();
+      const followCount = (scoped.leads || []).filter(l => l.nextStep && !l.nextStepDone).length;
+      container.innerHTML = `
+        <div class="space-y-5">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Tarefas & Follow-up Diário</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Quadro estilo Trello: crie cartões, atribua pessoas, defina prazos, etiquetas e checklists. Arraste os cartões entre as listas.</p>
+            </div>
+            <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl no-print">
+              <button onclick="tarefasView='quadro'; renderTarefas(document.getElementById('app-view'))" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${tarefasView === 'quadro' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow' : 'text-slate-500'}">📋 Quadro de Tarefas</button>
+              <button onclick="tarefasView='followups'; renderTarefas(document.getElementById('app-view'))" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${tarefasView === 'followups' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow' : 'text-slate-500'}">📞 Follow-ups de Leads (${followCount})</button>
+            </div>
+          </div>
+          <div id="tarefas-sub"></div>
+        </div>`;
+      const sub = document.getElementById('tarefas-sub');
+      if (tarefasView === 'followups') renderFollowupsLeads(sub);
+      else renderBoard(sub, db);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderBoard(sub, db) {
+      const members = boardMembers(db);
+      const lists = db.quadro.listas.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+      const archivedCount = db.quadro.cartoes.filter(c => c.archived).length;
+      const filtersOn = boardFilters.member !== 'all' || boardFilters.label !== 'all' || boardFilters.due !== 'all' || boardFilters.q;
+      const selCls = 'px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl dark:text-white';
+      sub.innerHTML = `
+        <div class="space-y-4">
+          <div class="glass-card p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-2 text-xs no-print">
+            <input id="board-search" type="text" value="${sanitize(boardFilters.q)}" oninput="boardFilters.q=this.value; boardSearchDebounced()" placeholder="🔍 Buscar cartões..." class="${selCls} w-48">
+            <select onchange="boardFilters.member=this.value; renderTarefas(document.getElementById('app-view'))" class="${selCls}">
+              <option value="all" ${boardFilters.member === 'all' ? 'selected' : ''}>👥 Todos os membros</option>
+              <option value="me" ${boardFilters.member === 'me' ? 'selected' : ''}>🙋 Só minhas tarefas</option>
+              ${boardCanSeeAll() ? members.map(m => `<option value="${m.id}" ${boardFilters.member === m.id ? 'selected' : ''}>${sanitize(m.name)}</option>`).join('') : ''}
+            </select>
+            <select onchange="boardFilters.label=this.value; renderTarefas(document.getElementById('app-view'))" class="${selCls}">
+              <option value="all">🏷️ Todas as etiquetas</option>
+              ${BOARD_LABELS.map(l => `<option value="${l.key}" ${boardFilters.label === l.key ? 'selected' : ''}>${l.name}</option>`).join('')}
+            </select>
+            <select onchange="boardFilters.due=this.value; renderTarefas(document.getElementById('app-view'))" class="${selCls}">
+              <option value="all" ${boardFilters.due === 'all' ? 'selected' : ''}>📅 Qualquer prazo</option>
+              <option value="overdue" ${boardFilters.due === 'overdue' ? 'selected' : ''}>⚠️ Atrasados</option>
+              <option value="today" ${boardFilters.due === 'today' ? 'selected' : ''}>⏰ Vencem hoje</option>
+              <option value="nodate" ${boardFilters.due === 'nodate' ? 'selected' : ''}>Sem data</option>
+              <option value="archived" ${boardFilters.due === 'archived' ? 'selected' : ''}>🗄️ Arquivados (${archivedCount})</option>
+            </select>
+            ${filtersOn ? `<button onclick="boardFilters={member:'all',label:'all',due:'all',q:''}; renderTarefas(document.getElementById('app-view'))" class="text-rose-500 font-bold hover:underline px-2">Limpar filtros ✕</button>` : ''}
+            <button onclick="boardAddList()" class="ml-auto px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow transition">+ Nova Lista</button>
+          </div>
+          <div class="flex gap-4 overflow-x-auto pb-6 items-start">
+            ${lists.map((lst, li) => renderBoardList(lst, li, lists.length, db, members)).join('')}
+            <button onclick="boardAddList()" class="flex-shrink-0 w-72 p-3 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-500 font-bold text-sm hover:border-blue-400 hover:text-blue-600 transition no-print">+ Adicionar outra lista</button>
+          </div>
+        </div>`;
+    }
+
+    function boardSearchDebounced() {
+      clearTimeout(boardSearchTimer);
+      boardSearchTimer = setTimeout(() => {
+        renderTarefas(document.getElementById('app-view'));
+        const i = document.getElementById('board-search');
+        if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+      }, 250);
+    }
+
+    function renderBoardList(lst, li, total, db, members) {
+      const cards = db.quadro.cartoes.filter(c => c.listId === lst.id && boardCardVisible(c)).sort((a, b) => (a.order || 0) - (b.order || 0));
+      return `
+        <div class="flex-shrink-0 w-72 bg-slate-100 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[75vh]">
+          <div class="px-3 pt-3 pb-2 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <h3 onclick="boardRenameList('${lst.id}')" title="Clique para renomear" class="font-extrabold text-sm text-slate-800 dark:text-slate-100 truncate cursor-pointer hover:text-blue-600">${sanitize(lst.title)}</h3>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${cards.length}</span>
+            </div>
+            <div class="flex items-center gap-0.5 no-print text-sm">
+              <button onclick="boardMoveList('${lst.id}',-1)" ${li === 0 ? 'disabled' : ''} class="px-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-20" title="Mover lista para a esquerda">‹</button>
+              <button onclick="boardMoveList('${lst.id}',1)" ${li === total - 1 ? 'disabled' : ''} class="px-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-20" title="Mover lista para a direita">›</button>
+              ${isManager() ? `<button onclick="boardDeleteList('${lst.id}')" class="px-1 text-slate-400 hover:text-rose-600" title="Excluir lista">🗑</button>` : ''}
+            </div>
+          </div>
+          <div class="px-2 pb-2 space-y-2 overflow-y-auto flex-1 min-h-[48px] rounded-xl transition" ondragover="boardDragOver(event)" ondragleave="boardDragLeave(event)" ondrop="boardDrop(event,'${lst.id}')">
+            ${cards.map(c => renderBoardCard(c, lst.id, db, members)).join('')}
+          </div>
+          <div class="px-2 pb-2 no-print">
+            ${addingCardListId === lst.id ? `
+              <textarea id="board-new-card-input" rows="2" placeholder="Insira um título para este cartão..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();boardSubmitNewCard('${lst.id}')} if(event.key==='Escape'){event.stopPropagation();boardCancelAddCard()}" class="w-full px-3 py-2 rounded-xl text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm dark:text-white"></textarea>
+              <div class="flex items-center gap-2 mt-1.5">
+                <button onclick="boardSubmitNewCard('${lst.id}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold">Adicionar cartão</button>
+                <button onclick="boardCancelAddCard()" class="px-2 py-1.5 text-slate-500 hover:text-slate-800 text-xs font-bold">✕</button>
+              </div>` : `
+              <button onclick="boardStartAddCard('${lst.id}')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition">+ Adicionar um cartão</button>`}
+          </div>
+        </div>`;
+    }
+
+    function renderBoardCard(c, listId, db, members) {
+      const due = cardDueInfo(c);
+      const chk = c.checklist || [];
+      const chkDone = chk.filter(i => i.done).length;
+      const comments = (c.atividade || []).filter(a => a.type === 'comment').length;
+      const lead = c.leadId ? (db.leads || []).find(l => l.id === c.leadId) : null;
+      const cardMembers = (c.members || []).map(id => members.find(m => m.id === id)).filter(Boolean);
+      return `
+        <div draggable="true" ondragstart="boardDragStart(event,'${c.id}')" ondragend="boardDragEnd(event)" ondragover="event.preventDefault()" ondrop="boardDrop(event,'${listId}','${c.id}')" onclick="openCardModal('${c.id}')" class="board-card bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-400 cursor-pointer transition ${c.archived ? 'opacity-60' : ''}">
+          ${(c.labels || []).length ? `<div class="flex flex-wrap gap-1 mb-2">${c.labels.map(k => { const lb = BOARD_LABELS.find(x => x.key === k); return lb ? `<span title="${lb.name}" class="h-2 w-10 rounded-full ${lb.cls}"></span>` : ''; }).join('')}</div>` : ''}
+          <div class="text-sm font-semibold break-words ${c.dueDone ? 'line-through text-slate-400' : 'text-slate-900 dark:text-white'}">${sanitize(c.title)}</div>
+          ${lead ? `<div class="mt-1 text-[11px] text-blue-600 dark:text-blue-400 font-semibold truncate">🔗 ${sanitize(lead.name)}</div>` : ''}
+          <div class="mt-2 flex items-end justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
+              ${due ? `<span class="px-1.5 py-0.5 rounded font-bold ${due.cls}">${due.txt}</span>` : ''}
+              ${c.desc ? `<span title="Possui descrição">📝</span>` : ''}
+              ${comments ? `<span title="Comentários">💬 ${comments}</span>` : ''}
+              ${chk.length ? `<span class="px-1.5 py-0.5 rounded font-bold ${chkDone === chk.length ? 'bg-emerald-500 text-white' : ''}">☑ ${chkDone}/${chk.length}</span>` : ''}
+              ${c.archived ? '<span class="font-bold">🗄️ Arquivado</span>' : ''}
+            </div>
+            <div class="flex -space-x-1.5 flex-shrink-0">
+              ${cardMembers.map(m => `<span title="${sanitize(m.name)}" class="w-6 h-6 rounded-full ${m.color} text-white text-[9px] font-extrabold flex items-center justify-center ring-2 ring-white dark:ring-slate-800">${sanitize(m.avatar)}</span>`).join('')}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // ---- Arrastar e soltar ----
+    function boardDragStart(ev, id) {
+      dragCardId = id;
+      try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', id); } catch (e) {}
+      ev.currentTarget.classList.add('opacity-40');
+    }
+    function boardDragEnd(ev) {
+      ev.currentTarget.classList.remove('opacity-40');
+      document.querySelectorAll('.board-drop-hover').forEach(el => el.classList.remove('board-drop-hover', 'ring-2', 'ring-blue-400'));
+    }
+    function boardDragOver(ev) { ev.preventDefault(); ev.currentTarget.classList.add('board-drop-hover', 'ring-2', 'ring-blue-400'); }
+    function boardDragLeave(ev) { ev.currentTarget.classList.remove('board-drop-hover', 'ring-2', 'ring-blue-400'); }
+    function boardDrop(ev, listId, beforeId) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      let id = dragCardId;
+      try { id = id || ev.dataTransfer.getData('text/plain'); } catch (e) {}
+      dragCardId = null;
+      if (!id || id === beforeId) { boardRerender(); return; }
+      moveCardTo(id, listId, beforeId || null);
+    }
+
+    // ---- Persistência ----
+    function boardLog(card, text, type = 'activity') {
+      if (!card.atividade) card.atividade = [];
+      const u = getCurrentUser();
+      card.atividade.unshift({ id: boardUid('act'), type, text, author: isManager() ? 'Gerente' : (u.name || 'Usuário'), date: Date.now() });
+    }
+
+    function boardRerender() {
+      if (currentTab === 'tarefas') renderTarefas(document.getElementById('app-view'));
+      const modal = document.getElementById('modal-card');
+      if (currentCardId && modal && !modal.classList.contains('hidden')) renderCardModal(currentCardId);
+    }
+
+    function boardUpdateCard(cardId, mutator, logText) {
+      const db = loadDB();
+      ensureBoard(db);
+      const card = db.quadro.cartoes.find(c => c.id === cardId);
+      if (!card) return null;
+      if (mutator(card, db) === false) return null;
+      if (logText) boardLog(card, typeof logText === 'function' ? logText(card, db) : logText);
+      saveDB(db);
+      boardRerender();
+      return card;
+    }
+
+    function moveCardTo(cardId, listId, beforeId) {
+      const db = loadDB();
+      ensureBoard(db);
+      const card = db.quadro.cartoes.find(c => c.id === cardId);
+      if (!card) return;
+      const from = card.listId;
+      const inList = db.quadro.cartoes.filter(c => c.listId === listId && c.id !== cardId).sort((a, b) => (a.order || 0) - (b.order || 0));
+      let idx = beforeId ? inList.findIndex(c => c.id === beforeId) : inList.length;
+      if (idx < 0) idx = inList.length;
+      inList.splice(idx, 0, card);
+      inList.forEach((c, i) => { c.order = i; });
+      card.listId = listId;
+      if (from !== listId) boardLog(card, `moveu este cartão de "${boardListTitle(db, from)}" para "${boardListTitle(db, listId)}"`);
+      saveDB(db);
+      boardRerender();
+    }
+
+    // ---- Listas ----
+    function boardAddList() {
+      const name = prompt('Nome da nova lista:', 'Nova Lista');
+      if (!name || !name.trim()) return;
+      const db = loadDB();
+      ensureBoard(db);
+      db.quadro.listas.push({ id: boardUid('lst'), title: name.trim(), order: db.quadro.listas.length });
+      saveDB(db);
+      boardRerender();
+    }
+    function boardRenameList(id) {
+      const db = loadDB();
+      ensureBoard(db);
+      const lst = db.quadro.listas.find(l => l.id === id);
+      if (!lst) return;
+      const name = prompt('Novo nome da lista:', lst.title);
+      if (!name || !name.trim()) return;
+      lst.title = name.trim();
+      saveDB(db);
+      boardRerender();
+    }
+    function boardMoveList(id, dir) {
+      const db = loadDB();
+      ensureBoard(db);
+      const lists = db.quadro.listas.sort((a, b) => (a.order || 0) - (b.order || 0));
+      const i = lists.findIndex(l => l.id === id);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= lists.length) return;
+      [lists[i], lists[j]] = [lists[j], lists[i]];
+      lists.forEach((l, k) => { l.order = k; });
+      saveDB(db);
+      boardRerender();
+    }
+    function boardDeleteList(id) {
+      if (!isManager()) return;
+      const db = loadDB();
+      ensureBoard(db);
+      if (db.quadro.listas.length <= 1) { alert('O quadro precisa ter pelo menos uma lista.'); return; }
+      const cards = db.quadro.cartoes.filter(c => c.listId === id && !c.archived);
+      if (!confirm(`Excluir a lista "${boardListTitle(db, id)}"?${cards.length ? ` Os ${cards.length} cartões dela serão arquivados.` : ''}`)) return;
+      const fallback = db.quadro.listas.find(l => l.id !== id).id;
+      db.quadro.cartoes.forEach(c => {
+        if (c.listId === id) {
+          c.listId = fallback;
+          if (!c.archived) { c.archived = true; boardLog(c, 'arquivou este cartão (lista excluída)'); }
+        }
+      });
+      db.quadro.listas = db.quadro.listas.filter(l => l.id !== id);
+      saveDB(db);
+      boardRerender();
+    }
+
+    // ---- Cartões ----
+    function boardStartAddCard(listId) {
+      addingCardListId = listId;
+      boardRerender();
+      setTimeout(() => { const i = document.getElementById('board-new-card-input'); if (i) i.focus(); }, 30);
+    }
+    function boardCancelAddCard() { addingCardListId = null; boardRerender(); }
+    function boardSubmitNewCard(listId) {
+      const inp = document.getElementById('board-new-card-input');
+      const title = inp ? inp.value.trim() : '';
+      if (!title) { boardCancelAddCard(); return; }
+      const db = loadDB();
+      ensureBoard(db);
+      const me = boardMyId();
+      const card = {
+        id: boardUid('crd'), listId, title, desc: '',
+        members: isManager() ? [] : [me], labels: [], dueDate: '', dueDone: false,
+        checklist: [], atividade: [], leadId: null, createdBy: me, createdAt: Date.now(),
+        order: db.quadro.cartoes.filter(c => c.listId === listId).length, archived: false
+      };
+      boardLog(card, `criou este cartão em "${boardListTitle(db, listId)}"`);
+      db.quadro.cartoes.push(card);
+      saveDB(db);
+      boardStartAddCard(listId);
+      return card.id;
+    }
+
+    function openCardModal(cardId) { currentCardId = cardId; renderCardModal(cardId); openModal('modal-card'); }
+    function closeCardModal() { currentCardId = null; closeModal('modal-card'); }
+
+    function renderCardModal(cardId) {
+      const db = loadDB();
+      ensureBoard(db);
+      const c = db.quadro.cartoes.find(x => x.id === cardId);
+      const body = document.getElementById('card-modal-body');
+      if (!c || !body) { closeCardModal(); return; }
+      const members = boardMembers(db);
+      const lists = db.quadro.listas.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+      const chk = c.checklist || [];
+      const chkDone = chk.filter(i => i.done).length;
+      const pct = chk.length ? Math.round(chkDone / chk.length * 100) : 0;
+      const due = cardDueInfo(c);
+      const leads = getScopedDB().leads || [];
+      const inputCls = 'w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white';
+      const secTitle = 'font-bold uppercase text-[10px] tracking-wider text-slate-400 mb-1.5';
+      const cardMembers = (c.members || []).map(id => members.find(m => m.id === id)).filter(Boolean);
+
+      body.innerHTML = `
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-3 flex-shrink-0">
+          <div class="flex-1 min-w-0">
+            <input id="card-title-input" value="${sanitize(c.title)}" onchange="boardSaveTitle('${c.id}', this.value)" class="w-full text-lg font-extrabold bg-transparent border-0 focus:ring-2 focus:ring-blue-500 rounded-lg px-1 -mx-1 text-slate-900 dark:text-white">
+            <div class="text-xs text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">na lista
+              <select onchange="moveCardTo('${c.id}', this.value, null)" class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border-0 text-xs font-bold text-slate-700 dark:text-slate-200">
+                ${lists.map(l => `<option value="${l.id}" ${l.id === c.listId ? 'selected' : ''}>${sanitize(l.title)}</option>`).join('')}
+              </select>
+              ${c.archived ? '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">🗄️ Arquivado</span>' : ''}
+            </div>
+          </div>
+          <button onclick="closeCardModal()" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold text-slate-600 dark:text-slate-300">✕ Fechar</button>
+        </div>
+
+        <div class="p-6 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-[1fr_220px] gap-6 text-xs">
+          <div class="space-y-6 min-w-0">
+            ${(cardMembers.length || (c.labels || []).length || due) ? `
+            <div class="flex flex-wrap gap-5">
+              ${cardMembers.length ? `<div><div class="${secTitle}">Membros</div><div class="flex gap-1">${cardMembers.map(m => `<span title="${sanitize(m.name)}" class="w-8 h-8 rounded-full ${m.color} text-white text-[10px] font-extrabold flex items-center justify-center">${sanitize(m.avatar)}</span>`).join('')}</div></div>` : ''}
+              ${(c.labels || []).length ? `<div><div class="${secTitle}">Etiquetas</div><div class="flex flex-wrap gap-1">${c.labels.map(k => { const lb = BOARD_LABELS.find(x => x.key === k); return lb ? `<span class="px-2.5 py-1 rounded-md text-white text-[11px] font-bold ${lb.cls}">${lb.name}</span>` : ''; }).join('')}</div></div>` : ''}
+              ${due ? `<div><div class="${secTitle}">Data de entrega</div><label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" ${c.dueDone ? 'checked' : ''} onchange="boardToggleDueDone('${c.id}')" class="w-4 h-4 rounded text-emerald-600"><span class="px-2 py-1 rounded font-bold ${due.cls}">${due.txt}${c.dueDone ? ' · concluído' : ''}</span></label></div>` : ''}
+            </div>` : ''}
+
+            <div>
+              <div class="font-extrabold text-sm text-slate-900 dark:text-white mb-2">📝 Descrição</div>
+              <textarea id="card-desc-input" rows="4" placeholder="Adicione uma descrição mais detalhada..." class="${inputCls}">${sanitize(c.desc || '')}</textarea>
+              <button onclick="boardSaveDesc('${c.id}')" class="mt-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold">Salvar descrição</button>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <div class="font-extrabold text-sm text-slate-900 dark:text-white">☑️ Checklist</div>
+                ${chk.length ? `<span class="font-bold text-slate-500">${chkDone}/${chk.length}</span>` : ''}
+              </div>
+              ${chk.length ? `<div class="flex items-center gap-2 mb-2"><span class="w-8 text-[11px] font-bold text-slate-500">${pct}%</span><div class="flex-1 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden"><div class="h-full ${pct === 100 ? 'bg-emerald-500' : 'bg-blue-500'}" style="width:${pct}%"></div></div></div>` : ''}
+              <div class="space-y-1">
+                ${chk.map(i => `
+                  <div class="group flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <input type="checkbox" ${i.done ? 'checked' : ''} onchange="boardToggleCheck('${c.id}','${i.id}')" class="w-4 h-4 rounded text-blue-600">
+                    <span class="flex-1 text-sm ${i.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200'}">${sanitize(i.text)}</span>
+                    <button onclick="boardDeleteCheck('${c.id}','${i.id}')" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600" title="Remover item">✕</button>
+                  </div>`).join('')}
+              </div>
+              <div class="flex gap-2 mt-2">
+                <input id="card-check-input" placeholder="Adicionar um item..." onkeydown="if(event.key==='Enter'){event.preventDefault();boardAddCheck('${c.id}')}" class="${inputCls} flex-1">
+                <button onclick="boardAddCheck('${c.id}')" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-lg font-bold text-slate-700 dark:text-slate-200">Adicionar</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="font-extrabold text-sm text-slate-900 dark:text-white mb-2">💬 Comentários e Atividade</div>
+              <div class="flex gap-2">
+                <input id="card-comment-input" placeholder="Escreva um comentário..." onkeydown="if(event.key==='Enter'){event.preventDefault();boardAddComment('${c.id}')}" class="${inputCls} flex-1">
+                <button onclick="boardAddComment('${c.id}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold">Enviar</button>
+              </div>
+              <div class="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1">
+                ${(c.atividade || []).map(a => a.type === 'comment' ? `
+                  <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                    <div class="text-[11px] text-slate-500"><b class="text-slate-800 dark:text-slate-200">${sanitize(a.author)}</b> · ${timeAgo(a.date)}</div>
+                    <div class="text-sm text-slate-800 dark:text-slate-200 mt-0.5 whitespace-pre-wrap">${sanitize(a.text)}</div>
+                  </div>` : `
+                  <div class="text-[11px] text-slate-500 px-1"><b class="text-slate-700 dark:text-slate-300">${sanitize(a.author)}</b> ${sanitize(a.text)} · ${timeAgo(a.date)}</div>`).join('') || '<div class="text-slate-400">Nenhuma atividade ainda.</div>'}
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-5">
+            <div>
+              <div class="${secTitle}">👥 Atribuir a</div>
+              <div class="space-y-1">
+                ${members.map(m => { const on = (c.members || []).includes(m.id); return `
+                  <button onclick="boardToggleMember('${c.id}','${m.id}')" class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg border text-left transition ${on ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'}">
+                    <span class="w-6 h-6 rounded-full ${m.color} text-white text-[9px] font-extrabold flex items-center justify-center">${sanitize(m.avatar)}</span>
+                    <span class="flex-1 font-semibold text-slate-700 dark:text-slate-200 truncate">${sanitize(m.name)}</span>
+                    ${on ? '<span class="text-blue-600 font-bold">✓</span>' : ''}
+                  </button>`; }).join('')}
+              </div>
+            </div>
+
+            <div>
+              <div class="${secTitle}">🏷️ Etiquetas</div>
+              <div class="space-y-1">
+                ${BOARD_LABELS.map(l => { const on = (c.labels || []).includes(l.key); return `
+                  <button onclick="boardToggleLabel('${c.id}','${l.key}')" class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-white text-[11px] font-bold ${l.cls} ${on ? 'ring-2 ring-offset-1 ring-slate-900 dark:ring-white' : 'opacity-70 hover:opacity-100'}">
+                    <span>${l.name}</span>${on ? '<span>✓</span>' : ''}
+                  </button>`; }).join('')}
+              </div>
+            </div>
+
+            <div>
+              <div class="${secTitle}">📅 Data de entrega</div>
+              <input type="date" value="${c.dueDate || ''}" onchange="boardSetDue('${c.id}', this.value)" class="${inputCls}">
+              ${c.dueDate ? `<button onclick="boardSetDue('${c.id}','')" class="mt-1 text-rose-500 font-bold hover:underline">Remover data</button>` : ''}
+            </div>
+
+            <div>
+              <div class="${secTitle}">🔗 Vincular a um Lead</div>
+              <select onchange="boardSetLead('${c.id}', this.value)" class="${inputCls}">
+                <option value="">— Nenhum —</option>
+                ${leads.map(l => `<option value="${l.id}" ${c.leadId === l.id ? 'selected' : ''}>${sanitize(l.name)}</option>`).join('')}
+              </select>
+              ${c.leadId ? `<button onclick="closeCardModal(); openDetailsModal('${c.leadId}')" class="mt-1 text-blue-600 font-bold hover:underline">📋 Abrir ficha do lead</button>` : ''}
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
+              <div class="${secTitle}">Ações</div>
+              <button onclick="boardToggleArchive('${c.id}')" class="w-full px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 font-bold text-left text-slate-700 dark:text-slate-200">${c.archived ? '♻️ Restaurar cartão' : '🗄️ Arquivar'}</button>
+              ${boardCanDelete(c) ? `<button onclick="boardDeleteCard('${c.id}')" class="w-full px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 hover:bg-rose-100 font-bold text-left">🗑️ Excluir cartão</button>` : ''}
+              <div class="text-[10px] text-slate-400 pt-1">Criado ${timeAgo(c.createdAt)}</div>
+            </div>
+          </div>
+        </div>`;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function boardSaveTitle(id, v) {
+      v = (v || '').trim();
+      if (!v) { boardRerender(); return; }
+      boardUpdateCard(id, c => { if (c.title === v) return false; c.title = v; }, 'renomeou este cartão');
+    }
+    function boardSaveDesc(id) {
+      const v = (document.getElementById('card-desc-input')?.value || '').trim();
+      boardUpdateCard(id, c => { if ((c.desc || '') === v) return false; c.desc = v; }, 'atualizou a descrição');
+    }
+    function boardToggleMember(id, memberId) {
+      const m = boardMembers(loadDB()).find(x => x.id === memberId);
+      const name = m ? m.name : memberId;
+      let txt = '';
+      boardUpdateCard(id, c => {
+        c.members = c.members || [];
+        if (c.members.includes(memberId)) { c.members = c.members.filter(x => x !== memberId); txt = `removeu ${name} deste cartão`; }
+        else { c.members.push(memberId); txt = `atribuiu este cartão a ${name}`; }
+      }, () => txt);
+    }
+    function boardToggleLabel(id, key) {
+      const lb = BOARD_LABELS.find(x => x.key === key);
+      let txt = '';
+      boardUpdateCard(id, c => {
+        c.labels = c.labels || [];
+        if (c.labels.includes(key)) { c.labels = c.labels.filter(x => x !== key); txt = `removeu a etiqueta "${lb ? lb.name : key}"`; }
+        else { c.labels.push(key); txt = `adicionou a etiqueta "${lb ? lb.name : key}"`; }
+      }, () => txt);
+    }
+    function boardSetDue(id, v) {
+      boardUpdateCard(id, c => {
+        if ((c.dueDate || '') === (v || '')) return false;
+        c.dueDate = v || '';
+        if (!v) c.dueDone = false;
+      }, v ? `definiu a entrega para ${boardFmtDate(v)}` : 'removeu a data de entrega');
+    }
+    function boardToggleDueDone(id) {
+      let txt = '';
+      boardUpdateCard(id, c => { c.dueDone = !c.dueDone; txt = c.dueDone ? 'marcou a entrega como concluída' : 'desmarcou a entrega como concluída'; }, () => txt);
+    }
+    function boardAddCheck(id) {
+      const inp = document.getElementById('card-check-input');
+      const text = inp ? inp.value.trim() : '';
+      if (!text) return;
+      boardUpdateCard(id, c => { c.checklist = c.checklist || []; c.checklist.push({ id: boardUid('chk'), text, done: false }); });
+      setTimeout(() => { const i = document.getElementById('card-check-input'); if (i) i.focus(); }, 30);
+    }
+    function boardToggleCheck(id, itemId) {
+      let txt = '';
+      boardUpdateCard(id, c => {
+        const it = (c.checklist || []).find(i => i.id === itemId);
+        if (!it) return false;
+        it.done = !it.done;
+        if (it.done) txt = `concluiu "${it.text}"`;
+      }, () => txt);
+    }
+    function boardDeleteCheck(id, itemId) {
+      boardUpdateCard(id, c => { c.checklist = (c.checklist || []).filter(i => i.id !== itemId); });
+    }
+    function boardAddComment(id) {
+      const inp = document.getElementById('card-comment-input');
+      const text = inp ? inp.value.trim() : '';
+      if (!text) return;
+      boardUpdateCard(id, c => { boardLog(c, text, 'comment'); });
+    }
+    function boardSetLead(id, leadId) {
+      const lead = (loadDB().leads || []).find(l => l.id === leadId);
+      boardUpdateCard(id, c => { c.leadId = leadId || null; }, lead ? `vinculou ao lead ${lead.name}` : 'removeu o vínculo com lead');
+    }
+    function boardToggleArchive(id) {
+      let txt = '';
+      boardUpdateCard(id, c => { c.archived = !c.archived; txt = c.archived ? 'arquivou este cartão' : 'restaurou este cartão'; }, () => txt);
+    }
+    function boardDeleteCard(id) {
+      const db = loadDB();
+      ensureBoard(db);
+      const card = db.quadro.cartoes.find(c => c.id === id);
+      if (!card || !boardCanDelete(card)) return;
+      if (!confirm(`Excluir definitivamente o cartão "${card.title}"?`)) return;
+      db.quadro.cartoes = db.quadro.cartoes.filter(c => c.id !== id);
+      saveDB(db);
+      closeCardModal();
+      boardRerender();
     }
 
     function toggleTaskDone(leadId) {
@@ -4366,7 +4942,8 @@
       const totalLeads = db.leads.filter(l => l.stage < 4).length;
       const totalJornada = db.jornada.length;
       const today = new Date().toISOString().split('T')[0];
-      const tarefasHoje = db.leads.filter(l => l.nextStep && !l.nextStepDone && l.nextStepDate <= today).length;
+      const boardDue = ((db.quadro && db.quadro.cartoes) || []).filter(c => !c.archived && !c.dueDone && c.dueDate && c.dueDate <= today && (isManager() || (c.members || []).includes(boardMyId()))).length;
+      const tarefasHoje = db.leads.filter(l => l.nextStep && !l.nextStepDone && l.nextStepDate <= today).length + boardDue;
 
       const badgeAtender = document.getElementById('badge-atender');
       const badgeMobile = document.getElementById('badge-atender-mobile');
@@ -5324,7 +5901,7 @@ CREATE POLICY "Permissao Total crm_jornada" ON crm_jornada FOR ALL USING (true) 
       setTab('painel');
       window.addEventListener('keydown', (ev) => {
         if (ev.key === 'Escape') {
-          ['modal-scripts','modal-lead','modal-details','modal-app-launcher','modal-supabase-config','modal-journey-status','modal-expense','modal-prop','modal-user-access'].forEach(id => closeModal(id));
+          ['modal-scripts','modal-lead','modal-details','modal-app-launcher','modal-supabase-config','modal-journey-status','modal-expense','modal-prop','modal-user-access','modal-card'].forEach(id => closeModal(id));
         }
       });
     });
